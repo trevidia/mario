@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Sponsor {
+  sid          Int            @id @default(autoincrement())
+  firstName    String         @map("first_name")
+  lastName     String         @map("last_name")
+  middleName   String?        @map("middle_name")
+  title        String?        @db.VarChar(10)
+  links        Link[]
+  EventSponsor EventSponsor[]
+}
+
+model User {
+  uid        Int      @id @default(autoincrement())
+  firstName  String   @map("first_name")
+  lastName   String   @map("last_name")
+  middleName String?  @map("middle_name")
+  username   String   @unique
+  password   String
+  email      String?  @unique @db.VarChar(254)
+  role       String?
+  createdAt  DateTime @default(now())
+}
+
+model Link {
+  lid       Int     @id @default(autoincrement())
+  url       String  @db.Text
+  sponsor   Sponsor @relation(fields: [sponsorId], references: [sid], onUpdate: Cascade)
+  sponsorId Int     @map("sid")
+}
+
+model Event {
+  eid          Int            @id @default(autoincrement())
+  title        String         @map("event_title")
+  school       School         @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
+  schoolId     Int            @map("schId")
+  slug         String
+  start        DateTime       @map("event_date")
+  end          DateTime       @map("event_deadline")
+  EventSponsor EventSponsor[]
+  EventPlayer  EventPlayer[]
+}
+
+model EventSponsor {
+  id        Int     @id @default(autoincrement())
+  event     Event   @relation(fields: [eventId], references: [eid], onUpdate: Cascade)
+  eventId   Int     @map("eid")
+  sponsor   Sponsor @relation(fields: [sponsorId], references: [sid], onUpdate: Cascade)
+  sponsorId Int     @map("sid")
+}
+
+model Player {
+  pid         Int           @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  middleName  String?
+  image       String        @db.Text
+  school      School        @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
+  schoolId    Int           @map("schId")
+  EventPlayer EventPlayer[]
+}
+
+model School {
+  schId  Int      @id @default(autoincrement())
+  name   String
+  Event  Event[]
+  Player Player[]
+}
+
+model Vote {
+  vid      Int         @id @default(autoincrement())
+  iusr     String      @map("instagram_username")
+  player   EventPlayer @relation(fields: [playerId], references: [id], onUpdate: Cascade)
+  playerId Int         @map("pid")
+}
+
+model EventPlayer {
+  id       Int    @id @default(autoincrement())
+  event    Event  @relation(fields: [eventId], references: [eid], onUpdate: Cascade)
+  eventId  Int    @map("eid")
+  player   Player @relation(fields: [playerId], references: [pid], onUpdate: Cascade)
+  playerId Int    @map("pid")
+  Vote     Vote[]
+}

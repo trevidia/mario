@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.input{
+    @apply border border-zinc-400 rounded-[3px]  py-1 px-2 focus:outline-none focus:border-fuchsia-400 focus:ring-2 ring-offset-1 ring-fuchsia-400/50;
+}
