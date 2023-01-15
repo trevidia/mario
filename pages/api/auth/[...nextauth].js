@@ -1,10 +1,8 @@
-import NextAuth, from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"
 import prisma from "../../../lib/prisma";
 import bcrypt from "bcrypt"
 
-
-console.log(process.env.NEXTAUTH_SECRET)
 const nextOptions = {
     strategy: 'jwt',
     secret: process.env.NEXTAUTH_SECRET,

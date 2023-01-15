@@ -11,13 +11,13 @@ datasource db {
 }
 
 model Sponsor {
-  sid          Int            @id @default(autoincrement())
-  firstName    String         @map("first_name")
-  lastName     String         @map("last_name")
-  middleName   String?        @map("middle_name")
-  title        String?        @db.VarChar(10)
-  links        Link[]
-  EventSponsor EventSponsor[]
+  sid             Int            @id @default(autoincrement())
+  firstName       String         @map("first_name")
+  lastName        String         @map("last_name")
+  middleName      String?        @map("middle_name")
+  title           String?        @db.VarChar(10)
+  links           Link[]
+  sponsoredEvents EventSponsor[]
 }
 
 model User {
@@ -40,15 +40,15 @@ model Link {
 }
 
 model Event {
-  eid          Int            @id @default(autoincrement())
-  title        String         @map("event_title")
-  school       School         @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
-  schoolId     Int            @map("schId")
-  slug         String
-  start        DateTime       @map("event_date")
-  end          DateTime       @map("event_deadline")
-  EventSponsor EventSponsor[]
-  EventPlayer  EventPlayer[]
+  eid           Int            @id @default(autoincrement())
+  title         String         @map("event_title")
+  school        School         @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
+  schoolId      Int            @map("schId")
+  slug          String         @default(cuid())
+  start         DateTime       @map("event_date")
+  end           DateTime       @map("event_deadline")
+  eventSponsors EventSponsor[]
+  eventPlayers  EventPlayer[]
 }
 
 model EventSponsor {
@@ -60,21 +60,21 @@ model EventSponsor {
 }
 
 model Player {
-  pid         Int           @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  middleName  String?
-  image       String        @db.Text
-  school      School        @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
-  schoolId    Int           @map("schId")
-  EventPlayer EventPlayer[]
+  pid              Int           @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  middleName       String?
+  image            String        @db.Text
+  school           School        @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
+  schoolId         Int           @map("schId")
+  registeredEvents EventPlayer[]
 }
 
 model School {
-  schId  Int      @id @default(autoincrement())
-  name   String
-  Event  Event[]
-  Player Player[]
+  schId   Int      @id @default(autoincrement())
+  name    String
+  events  Event[]
+  players Player[]
 }
 
 model Vote {
@@ -90,5 +90,5 @@ model EventPlayer {
   eventId  Int    @map("eid")
   player   Player @relation(fields: [playerId], references: [pid], onUpdate: Cascade)
   playerId Int    @map("pid")
-  Vote     Vote[]
+  votes    Vote[]
 }

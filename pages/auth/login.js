@@ -1,9 +1,11 @@
 import {signIn} from "next-auth/react";
 import {useState} from "react";
+import {useRouter} from "next/router";
 
 
 const Login = () => {
     const [userInfo, setUserInfo] = useState({username: "", password: ""})
+    const router = useRouter()
 
     const handleSubmit = async (e) => {
       e.preventDefault()
@@ -12,6 +14,10 @@ const Login = () => {
             password: userInfo.password,
             redirect: false
         })
+        if (!res.error){
+            const {callbackUrl} = router.query
+            router.push(callbackUrl)
+        }
         console.log(res)
     }
 
