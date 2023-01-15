@@ -8,7 +8,7 @@ const EventCard = () => {
   return (
       <div onClick={()=>!clicked && setClicked(true)} className={`h-max w-[300px] bg-gunmetal rounded py-3 mr-2 px-4 flex flex-col ${clicked && 'ring-2 ring-gunmetal/50 ring-offset-1'}`}>
           <h4 className={"text-2xl font-semibold text-cultured/95"}>
-              Lasu Ballon D'or
+              Lasu Ballon D&apos;or
           </h4>
           <div className={'flex items-center'}>
               <Ping size={'h-3 w-3 mr-2'}/>

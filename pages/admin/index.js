@@ -5,12 +5,13 @@ import SponsorCard from "../../components/SponsorCard";
 import BaseLayout from "../../components/BaseLayout";
 
 
-const admin = ()=>{
+const Admin = ()=>{
     const votes = [30, 40, 50]
     const totalVotes = votes.reduce((previousValue, currentValue)=>{
         return previousValue + currentValue
     })
     const [tab, setTab] = useState("Events")
+
     return (
         <BaseLayout>
             <div className={'flex h-10 w-max'}>
@@ -66,4 +67,4 @@ const admin = ()=>{
     )
 }
 
-export default admin
+export default Admin
