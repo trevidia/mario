@@ -13,6 +13,7 @@ const handler = async (req, res) => {
                         school: true,
                         eventPlayers: {
                             select: {
+                                id: true,
                                 player: true
                             }
                         },
