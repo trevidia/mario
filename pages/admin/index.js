@@ -3,6 +3,7 @@ import PlayerVote from "../../components/PlayerVote";
 import {useState} from "react";
 import SponsorCard from "../../components/SponsorCard";
 import BaseLayout from "../../components/BaseLayout";
+import Icon from "../../components/Icon";
 
 
 const Admin = ()=>{
@@ -24,9 +25,7 @@ const Admin = ()=>{
             </div>
             <div className={'flex h-14 justify-between items-center'}>
                 <div className={'flex items-center px-3 py-2 hover:bg-zinc-200 cursor-pointer rounded-md'}>
-                        <span className="material-symbols-rounded mr-2">
-                            add
-                        </span>
+                        <Icon icon={'add'} className={'mr-2'}/>
                     <span>create event</span>
                 </div>
                 <div className={'underline cursor-pointer'}>

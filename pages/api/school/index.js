@@ -1,9 +1,10 @@
 import prisma from "../../../lib/prisma";
 const handler = async (req, res) => {
+    let schools
     try {
         switch (req.method) {
             case "GET":
-                const schools = await prisma.school.findMany()
+                schools = await prisma.school.findMany()
                 return res.json(schools)
             case "POST":
                 const {schoolName} = req.body
@@ -13,7 +14,8 @@ const handler = async (req, res) => {
                         name: schoolName
                     }
                 })
-                return res.status(201).json({message: "Success", school})
+                schools = await prisma.school.findMany()
+                return res.status(201).json({message: "Success", school, schools})
             default:
                 return res.status(405).json({message: "Method not allowed"})
         }

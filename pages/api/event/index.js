@@ -7,7 +7,7 @@ const handler = async (req, res) => {
                 const events = await prisma.event.findMany()
                 return res.json(events)
             case "POST":
-                const {title, school, start, end} = req.body
+                const {title, school, start, end, players, sponsor} = req.body
                 if (!(title && school && start && end)) return res.status(400).json({message: "Invalid Input"})
                 const startDate = new Date(start)
                 const endDate = new Date(end)
@@ -19,12 +19,27 @@ const handler = async (req, res) => {
                         title, schoolId: school, start: startDate, end: endDate
                     }
                 })
+                console.log(event)
+
+                const eventSponsor = await prisma.eventSponsor.create({
+                    data: {
+                        eventId: event.eid,
+                        sponsorId: sponsor.sid,
+                    }
+                })
+                console.log(eventSponsor)
+                const many = players.map(player => {return {eventId: event.eid, playerId: player.pid}})
+                console.log(many)
+                const eventPlayers = await prisma.eventPlayer.createMany({
+                    data: many
+                })
 
                 return res.status(201).json({message: "success", event})
             default:
                 return res.status(405).json({message: "Method not allowed"})
         }
     } catch (e) {
+        console.log(e)
         return res.status(500).json({message: "Internal server error", error: e.error, errorMessage: e.message})
     }
 }
