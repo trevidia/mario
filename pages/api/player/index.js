@@ -17,8 +17,8 @@ const formParser = (req)=>{
         let imageUrl
         await form.parse(req, async (err, fields, files) => {
             const {image} = files
-            const {firstName, lastName, school, middleName} = fields
-            if (!(firstName && lastName && image && school)) return reject('Invalid Input')
+            const {department, school, name} = fields
+            if (!(image && name && image && school)) return reject('Invalid Input')
             const key = `${school}/${image.originalFilename}`
             s3Client.putObject({
                 Bucket: "ballonmario",
@@ -31,10 +31,14 @@ const formParser = (req)=>{
                 } else {
                     const player = await prisma.player.create({
                         data: {
-                            firstName, lastName, middleName, image: key, schoolId: parseInt(school)
+                            name, department, image: key, schoolId: parseInt(school)
                         }
                     })
-                    const players = await prisma.player.findMany()
+                    const players = await prisma.player.findMany({
+                        where: {
+                            schoolId: parseInt(school)
+                        }
+                    })
                     return resolve({player, players})
                 }
             })
@@ -55,7 +59,9 @@ const handler = async (req, res) => {
                 const players = await prisma.player.findMany()
                 return res.json(players)
             case "POST":
-                const resObject = await formParser(req)
+                const resObject = await formParser(req).catch((err)=>{
+                    console.log(err)
+                })
 
                 return res.status(201).json({message: "success", ...resObject})
             default:

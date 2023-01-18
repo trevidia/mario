@@ -1,337 +1,365 @@
 import BaseLayout from "../../../components/BaseLayout";
-import {useEffect, useState} from "react";
+import {useEffect, useReducer, useState} from "react";
 import Icon from "../../../components/Icon";
-import Image from "next/image";
 import axios from "../../../lib/axios";
+import {
+    addNewPlayer,
+    addNewSchool, addNewSponsor, addNewSponsorLink, editNewSponsorLink,
+    eventReducer,
+    initEvent, setEndDate,
+    setEventTitle,
+    setNewSchool, setPlayerDepartment, setPlayerImage, setPlayerName, setPlayers, setSchoolId,
+    setSchools, setSponsorName, setSponsors, setStartDate
+} from "../../../lib/eventReducer";
+import Loading from "../../../components/Loading";
+import {useRouter} from "next/router";
 
 const NewEvent = (props) => {
-    const now = new Date(Date.now())
-    const minute = now.getMinutes().toString()
-    const month = ['01','02','03', '04', '05','06', '07', '08', '09', '10', '11', '12']
-    const [data, setData] = useState({
-        startDate: `${now.getFullYear()}-${month[now.getMonth()]}-${now.getDate()}T${now.getHours()}:${minute.length === 1 ? '0' + minute : minute}`,
-        endDate: ""}
-    )
-    const [onAddSchool, setOnAddSchool] = useState(false)
-    const [players, setPlayers] = useState([])
-    const [player, setPlayer] = useState({firstName: "", lastName: "", middleName: "", imageName: "", image: null })
-    const [addPlayer, setAddPlayer] = useState(false)
-    const [addSponsor, setAddSponsor] = useState(false)
-    const [links, setLinks] = useState(props.sponsor.links.map(l=>l.url))
-    const addLink = ()=>setLinks(prevState => [...prevState, ""])
-    const [eventTitle, setEventTitle] = useState("")
-    const [schoolId, setSchoolId] = useState(0)
-    const [school, setSchool] = useState("")
-    const [schools, setSchools] = useState(props.schools)
-    const [sponsor, setSponsor] = useState(props.sponsor)
+    console.log(props)
+    const [state, dispatch] = useReducer(eventReducer, {schools: props.schools, sponsors: props.sponsors}, initEvent)
+    const [loading, setLoading] = useState(false)
+    const router = useRouter()
 
-    useEffect(()=>{
-        axios.get(`/school/${schoolId}/players`).then((res)=>{
-            setPlayers(res.data.players)
-        })
-    }, [schoolId])
+    useEffect(() => {
+        if (state.event.schoolId) {
+            setLoading(true)
+            axios.get(`/school/${state.event.schoolId}/players`).then((res) => {
+                dispatch(setPlayers(res.data.players))
+                setLoading(false)
+            }).catch((err)=> setLoading(false))
+        }
+    }, [state.event.schoolId])
 
-  return (
-      <BaseLayout>
-          <div className={'w-full h-full rounded-md bg-white mb-3 drop-shadow px-4 py-6 flex justify-center overflow-y-auto'}>
-             <div className={'w-3/5'}>
-                 <div className={'border-b py-3 mb-2'}>
-                     <h4 className={"text-2xl mb-3"}>
-                         Event
-                     </h4>
-                     <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                      <h6 className={'input-label'}>
-                          Event title
-                      </h6>
-                         <input type={'text'} className={'input'} value={eventTitle} onChange={(e)=> setEventTitle(e.target.value)}/>
-                     </div>
-                     <div className={'w-full flex justify-between mb-3 flex-wrap'}>
+    return (
+        <>
+            {
+                loading && <Loading/>
+            }
+        <BaseLayout>
+            <div
+                className={'w-full h-full rounded-md bg-white mb-3 drop-shadow px-4 py-6 flex justify-center overflow-y-auto'}>
+                <div className={'w-3/5'}>
+                    <div className={'border-b py-3 mb-2'}>
+                        <h4 className={"text-2xl mb-3"}>
+                            Event
+                        </h4>
+                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
+                            <h6 className={'input-label'}>
+                                Event title
+                            </h6>
+                            <input type={'text'} className={'input'} value={state.event.eventTitle}
+                                   onChange={(e) => dispatch(setEventTitle(e.target.value))}/>
+                        </div>
+                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
                          <span className={'input-label'}>
                              {
-                                 !onAddSchool ? "School" : "School Name"}
+                                 !state.addSchool ? "School" : "School Name"}
                          </span>
-                         {
-                             !onAddSchool ? (
-                                     <select className={'input h-10 bg-white'} value={schoolId} onChange={(e)=>setSchoolId(parseInt(e.target.value))}>
-                                         {
-                                             schools.map((mapSchool, index)=> (
-                                                 <option key={index} value={mapSchool.schId}>{mapSchool.name}</option>
-                                             ))
-                                         }
-                                     </select>
-                             ) : <input type={'text'} className={'input'} value={school} onChange={(e)=> setSchool(e.target.value)}/>
-                         }
-                     </div>
-                     {
-                         !onAddSchool ?
-                         <button
-                             className={'outlined-btn'}
-                             onClick={()=>setOnAddSchool(true)}>
-                             <Icon icon={'add'} className={'mr-2'}/>
-                             <span className={''}>
+                            {
+                                !state.addSchool ? (
+                                    <select className={'input h-10 bg-white'} value={state.event.schoolId}
+                                            onChange={(e) => dispatch(setSchoolId(parseInt(e.target.value)))}>
+                                        <option defaultValue hidden>Select School</option>
+                                        {
+                                            state.schools.map((mapSchool, index) => (
+                                                <option key={index} value={mapSchool.schId}>{mapSchool.name}</option>
+                                            ))
+                                        }
+                                    </select>
+                                ) : <input type={'text'} className={'input'} value={state.newSchool}
+                                           onChange={(e) => dispatch(setNewSchool(e.target.value))}/>
+                            }
+                        </div>
+                        {
+                            !state.addSchool ?
+                                <button
+                                    className={'outlined-btn'}
+                                    onClick={() => dispatch(addNewSchool())}>
+                                    <Icon icon={'add'} className={'mr-2'}/>
+                                    <span className={''}>
                                  Add School
                              </span>
-                         </button> : (
-                             <div className={"flex"}>
-                                 <button className={'outlined-btn mr-2'} onClick={()=>{setOnAddSchool(false); setSchool("")}}>
-                                     <Icon icon={'cancel'} className={'mr-2'}/>
-                                     <span>
+                                </button> : (
+                                    <div className={"flex"}>
+                                        <button className={'outlined-btn mr-2'} onClick={() => {
+                                            dispatch(setSchools(state.schools))
+                                        }}>
+                                            <Icon icon={'cancel'} className={'mr-2'}/>
+                                            <span>
                                          Cancel Add School
                                      </span>
-                                 </button>
-                                 <button className={'outlined-btn'}
-                                         onClick={()=>{
-                                             axios.post('/school', {schoolName: school}).then((res)=>{
-                                                 setSchools(res.data.schools)
-                                                 setSchoolId(res.data.school.schId)
-                                                 setOnAddSchool(false)
-                                                 setSchool("")
-                                                 console.log(res)
-                                             })
-                                         }
-                                        }>
-                                     <Icon icon={'save'} className={'mr-2'}/>
-                                     <span>
+                                        </button>
+                                        <button className={'outlined-btn'}
+                                                onClick={() => {
+                                                    setLoading(true)
+                                                    axios.post('/school', {schoolName: state.newSchool}).then((res) => {
+
+                                                        dispatch(setSchools(res.data.schools))
+                                                        dispatch(setSchoolId(res.data.school.schId))
+                                                        console.log(res)
+                                                        setLoading(false)
+                                                    }).catch((err)=>{
+                                                        setLoading(false)
+                                                    })
+                                                }
+                                                }>
+                                            <Icon icon={'save'} className={'mr-2'}/>
+                                            <span>
                                          Save School
                                      </span>
-                                 </button>
+                                        </button>
 
-                             </div>
-                             )
-                     }
-                     <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                         <span className={'input-label'}>Start Date</span>
-                         <input
-                             className={'input'}
-                             type={'datetime-local'}
-                             value={data.startDate}
-                             onChange={
-                             (e)=> setData({...data, startDate: e.target.value})}/>
-                     </div>
-                     <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                         <span className={'input-label'}>End Date</span>
-                         <input className={'input'} type={'datetime-local'} value={data.endDate} onChange={(e)=> setData({...data, endDate: e.target.value})}/>
-                     </div>
-                 </div>
-                 <div className={'border-b py-3 mb-2'}>
-                     <h2 className={'text-2xl mb-3'}>
-                         Players
-                     </h2>
-                     {
-                         players.map((mapPlayer, index) => (
-                             <div className={'flex mb-4 bg-zinc-200 p-2 rounded-md'} key={index}>
-                                 <img src={`https://ballonmario.s3.eu-west-3.amazonaws.com/${mapPlayer.image}`} className={"h-20 w-20 mr-3 object-cover rounded-md drop-shadow"} alt={`Image of ${mapPlayer.firstName}`} />
-
-                                 <span className={'capitalize text-lg text-zinc-900'}>
+                                    </div>
+                                )
+                        }
+                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
+                            <span className={'input-label'}>Start Date</span>
+                            <input
+                                className={'input'}
+                                type={'datetime-local'}
+                                value={state.event.start}
+                                onChange={
+                                    (e) => dispatch(setStartDate(e.target.value))}/>
+                        </div>
+                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
+                            <span className={'input-label'}>End Date</span>
+                            <input className={'input'} type={'datetime-local'} value={state.event.end}
+                                   onChange={(e) => dispatch(setEndDate(e.target.value))}/>
+                        </div>
+                    </div>
+                    <div className={'border-b py-3 mb-2'}>
+                        <h2 className={'text-2xl mb-3'}>
+                            Players
+                        </h2>
+                        {
+                            state.players.map((player, index) => (
+                                <div className={'flex mb-4 bg-zinc-200 p-2 rounded-md'} key={index}>
+                                    <img src={`https://ballonmario.s3.eu-west-3.amazonaws.com/${player.image}`}
+                                         className={"h-20 w-20 mr-3 object-cover rounded-md drop-shadow"}
+                                         alt={`Image of ${player.name}`}/>
+                                    <div className={'flex flex-col'}>
+                                        <span className={'capitalize text-xl mb-3 text-zinc-900'}>
                                      {
-                                         `${mapPlayer.firstName} ${mapPlayer.lastName} ${mapPlayer.middleName[0]}.`
+                                         player.name
                                      }
                                  </span>
-                             </div>
-                         ))
-                     }
-                     {
-                         addPlayer && (
-                             <>
-                             <div className={'flex justify-between mb-3 flex-wrap'}>
+                                        <span>
+                                            {
+                                                player.department
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                        {
+                            state.addPlayer && (
+                                <>
+                                    <div className={'flex justify-between mb-3 flex-wrap'}>
                                  <span className={'input-label'}>
-                                     First name
+                                     Name
                                  </span>
-                                 <input type={'text'} className={'input'} value={player.firstName} onChange={(e)=>setPlayer({...player, firstName: e.target.value})}/>
-                             </div>
-                             <div className={'flex justify-between mb-3 flex-wrap'}>
+                                        <input type={'text'} className={'input'} value={state.newPlayer.name}
+                                               onChange={(e) => dispatch(setPlayerName(e.target.value))}/>
+                                    </div>
+                                    <div className={'flex justify-between mb-3 flex-wrap'}>
                                  <span className={'input-label'}>
-                                     Last name
+                                     Department
                                  </span>
-                                 <input type={'text'} className={'input'} value={player.lastName} onChange={(e)=>setPlayer({...player, lastName: e.target.value})}/>
-                             </div>
-                             <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Middle name
-                                 </span>
-                                 <input type={'text'} className={'input'} value={player.middleName} onChange={(e)=>setPlayer({...player, middleName: e.target.value})}/>
-                             </div>
-                                 <div className={'flex justify-between mb-3 flex-wrap'}>
+                                        <input type={'text'} className={'input'} value={state.newPlayer.department}
+                                               onChange={(e) => dispatch(setPlayerDepartment(e.target.value))}/>
+                                    </div>
+                                    <div className={'flex justify-between mb-3 flex-wrap'}>
                                      <span className={'input-label'}>
                                      Picture
                                  </span>
-                                     <input type={'file'} className={'file-input'} onChange={(e)=> setPlayer({...player, imageName: e.target.value, image: e.target.files[0]})} value={player.imageName} accept={'image/*'}/>
-                                 </div>
-                             </>
-                         )
-                     }
-                     {
-                         addPlayer ? (
-                             <div className={'flex'}>
-                                 <button className={'outlined-btn mr-2'} onClick={()=> setAddPlayer(false)}>
-                                     <Icon icon={'cancel'} className={'mr-2'}/>
-                                     <span>Cancel Add Player</span>
-                                 </button>
-                                 {
-                                     player.firstName && player.lastName && player.middleName && player.image && (
-                                         <button className={'outlined-btn'} onClick={()=> {
+                                        <input type={'file'} className={'file-input'}
+                                               onChange={(e) => dispatch(setPlayerImage({
+                                                   imageName: e.target.value,
+                                                   image: e.target.files[0]
+                                               }))} value={state.newPlayer.imageName} accept={'image/*'}/>
+                                    </div>
+                                </>
+                            )
+                        }
+                        {
+                            state.addPlayer ? (
+                                <div className={'flex'}>
+                                    <button className={'outlined-btn mr-2'}
+                                            onClick={() => dispatch(setPlayers(state.players))}>
+                                        <Icon icon={'cancel'} className={'mr-2'}/>
+                                        <span>Cancel Add Player</span>
+                                    </button>
+                                    {
+                                        state.newPlayer.name && state.newPlayer.department && state.newPlayer.image && (
+                                            <button className={'outlined-btn'} onClick={() => {
 
-                                             let formData = new FormData()
-                                             formData.append('image', player.image)
-                                             formData.append('firstName', player.firstName)
-                                             formData.append('lastName', player.lastName)
-                                             formData.append('middleName', player.middleName)
-                                             formData.append('school', schoolId)
-                                             axios.post('/player', formData, {
-                                                 headers: {
-                                                     "Content-Type": "multipart/form-data"
-                                                 }
-                                             }).then(r => {
-                                                 setPlayers(prevState => {
-                                                     return r.data.players
-                                                 })
-                                                 console.log(r)
-                                                 setAddPlayer(false)
-                                             }).catch(error => console.log(error))
-                                             setPlayer({lastName: "", middleName: "", firstName: "", imageName: "", image: null})
-                                             // setAddPlayer(false)
-                                         }}>
-                                             <Icon icon={'add'} className={'mr-2'}/>
-                                             <span>Add</span>
-                                         </button>
-                                     )
-                                 }
-                             </div>
-                         ) : (
-                             <button className={'outlined-btn'} onClick={()=> setAddPlayer(true)}>
-                                 <Icon icon={'add'} className={'mr-2'}/>
-                                 <span>Add player</span>
-                             </button>
-                         )
-                     }
-                 </div>
-                 <div className={'mb-3'}>
-                     <h2 className={"text-2xl mb-3"}>
-                         Sponsors
-                     </h2>
-                     <div className={'mb-3 px-2'}>
-                         <p className={'text-lg'}>{sponsor.title} {sponsor.firstName} {sponsor.lastName}</p>
-                         <div className={'flex flex-col'}>
-                             {
-                                 links.map(link => <span className={'p-1 rounded bg-zinc-200 my-1'}>{link}</span>)
-                             }
-                         </div>
-                     </div>
-                     {
-                         addSponsor && (
-                             <>
+                                                let formData = new FormData()
+                                                formData.append('image', state.newPlayer.image)
+                                                formData.append('name', state.newPlayer.name)
+                                                formData.append('department', state.newPlayer.department)
+                                                formData.append('school', state.event.schoolId)
+                                                setLoading(true)
+                                                axios.post('/player', formData, {
+                                                    headers: {
+                                                        "Content-Type": "multipart/form-data"
+                                                    }
+                                                }).then(r => {
+                                                    dispatch(setPlayers(r.data.players))
+                                                    setLoading(false)
+                                                }).catch(error => {
+                                                    console.log(error)
+                                                    setLoading(false)
+                                                })
+                                            }}>
+                                                <Icon icon={'add'} className={'mr-2'}/>
+                                                <span>Add</span>
+                                            </button>
+                                        )
+                                    }
+                                </div>
+                            ) : (
+                                <button className={'outlined-btn'} onClick={() => dispatch(addNewPlayer())}>
+                                    <Icon icon={'add'} className={'mr-2'}/>
+                                    <span>Add player</span>
+                                </button>
+                            )
+                        }
+                    </div>
+                    <div className={'mb-3'}>
+                        <h2 className={"text-2xl mb-3"}>
+                            Sponsor
+                        </h2>
+                        {
+                            state.sponsors.map((sponsor, index) => (
+                                <div className={'mb-3 px-2'} key={index}>
+                                    <p className={'text-lg'}>{sponsor.name}</p>
+                                    <div className={'flex flex-col'}>
+                                        {
+                                            sponsor.links.map((link, linkId) => <span
+                                                className={'p-1 rounded bg-zinc-200 my-1'}
+                                                key={linkId}>{link.url}</span>)
+                                        }
+                                    </div>
+                                </div>
+                            ))
+                        }
+                        {
+                            state.addSponsor && (
+                                <>
 
-                                 <div className={'flex justify-between mb-3 flex-wrap'}>
+                                    <div className={'flex justify-between mb-3 flex-wrap'}>
                                  <span className={'input-label'}>
-                                     Title
+                                     Name
                                  </span>
-                                     <input type={'text'} className={'input'} value={sponsor.title} onChange={(e)=>setSponsor({...sponsor, title: e.target.value})}/>
-                                 </div>
-                                 <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     First name
-                                 </span>
-                                     <input type={'text'} className={'input'} value={sponsor.firstName} onChange={(e)=>setSponsor({...sponsor, firstName: e.target.value})}/>
-                                 </div>
-                                 <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Last name
-                                 </span>
-                                     <input type={'text'} className={'input'} value={sponsor.lastName} onChange={(e)=>setSponsor({...sponsor, lastName: e.target.value})}/>
-                                 </div>
-                                 <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Middle name
-                                 </span>
-                                     <input type={'text'} className={'input'} value={sponsor.middleName} onChange={(e)=>setSponsor({...sponsor, middleName: e.target.value})}/>
-                                 </div>
-                                 {
-                                     links.map((link, index)=> (
-                                         <div className={'flex justify-between mb-3 flex-wrap relative'} key={index}>
+                                        <input type={'text'} className={'input'} value={state.newSponsor.name}
+                                               onChange={(e) => dispatch(setSponsorName(e.target.value))}/>
+                                    </div>
+
+                                    {
+                                        state.newSponsor.links.map((link, index) => (
+                                            <div className={'flex justify-between mb-3 flex-wrap relative'} key={index}>
                                              <span className={'input-label'}>
                                                  Link {index + 1}
                                              </span>
-                                             <input type={'text'} className={'input'} value={link} onChange={(e)=>setLinks(prevState => {
-                                                 let state = prevState
-                                                 state[index] = e.target.value
-
-                                                 return [...state]
-                                             })}/>
-                                             <div className={'absolute left-full ml-2 flex'}>
-                                                 {
-                                                     links.length !== 0 && (
-                                                         <span className={"h-8 w-8 border border-fuchsia-800 flex items-center justify-center text-fuchsia-800 rounded-full mr-2"} onClick={() => setLinks(prevState => {
-                                                             return [...prevState.filter((val, prevIndex) => prevIndex !== index )]
-                                                         })}>
+                                                <input type={'text'} className={'input'} value={link}
+                                                       onChange={(e) => dispatch(editNewSponsorLink({
+                                                           link: e.target.value,
+                                                           linkId: index
+                                                       }))}/>
+                                                <div className={'absolute left-full ml-2 flex'}>
+                                                    {
+                                                        state.newSponsor.links.length !== 0 && (
+                                                            <span
+                                                                className={"h-8 w-8 border border-fuchsia-800 flex items-center justify-center text-fuchsia-800 rounded-full mr-2"}
+                                                                onClick={() => setLinks(prevState => {
+                                                                    return [...prevState.filter((val, prevIndex) => prevIndex !== index)]
+                                                                })}>
                                                              <Icon icon={'delete'}/>
                                                          </span>
-                                                     )
-                                                 }
-                                                 {
-                                                     links.length === index + 1 && (
-                                                         <span className={"h-8 w-8 border border-fuchsia-800 flex items-center justify-center text-fuchsia-800 rounded-full"} onClick={addLink}>
+                                                        )
+                                                    }
+                                                    {
+                                                        state.newSponsor.links.length === index + 1 && (
+                                                            <span
+                                                                className={"h-8 w-8 border border-fuchsia-800 flex items-center justify-center text-fuchsia-800 rounded-full"}
+                                                                onClick={() => dispatch(addNewSponsorLink())}>
                                                              <Icon icon={'add'}/>
                                                          </span>
-                                                     )
-                                                 }
-                                             </div>
-                                         </div>
-                                     ))
-                                 }
-                             </>
-                         )
-                     }
-                     {
-                         addSponsor ? (
-                             <div className={'flex'}>
-                             <button className={'outlined-btn mr-2'} onClick={()=>setAddSponsor(false)}>
-                                 <Icon icon={'cancel'} className={'mr-2'}/>
-                                 <span>
+                                                        )
+                                                    }
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
+                                </>
+                            )
+                        }
+                        {
+                            state.addSponsor ? (
+                                <div className={'flex'}>
+                                    <button className={'outlined-btn mr-2'}
+                                            onClick={() => dispatch(setSponsors(state.sponsors))}>
+                                        <Icon icon={'cancel'} className={'mr-2'}/>
+                                        <span>
                              Cancel Add Sponsor
                          </span>
-                             </button>
-                                 <button className={'outlined-btn'} onClick={()=> {
-                                     axios.post('/sponsor', {...sponsor, links}).then((res)=>{
-                                         setAddSponsor(false)
-                                     })
-                                 }}>
-                                     <Icon icon={'add'} className={'mr-2'}/>
-                                     <span>
+                                    </button>
+                                    <button className={'outlined-btn'} onClick={() => {
+                                        setLoading(true)
+                                        axios.post('/sponsor', {...state.newSponsor}).then((res) => {
+                                            dispatch(setSponsors(res.data.sponsors))
+                                            setLoading(false)
+                                        }).catch((err)=> {
+                                            setLoading(false)
+                                        })
+                                    }}>
+                                        <Icon icon={'add'} className={'mr-2'}/>
+                                        <span>
                                      Add
                                  </span>
-                                 </button>
-                             </div>
+                                    </button>
+                                </div>
 
-                         ) : (
-                             <button className={'outlined-btn'} onClick={()=>setAddSponsor(true)}>
-                                 <Icon icon={'add'} className={'mr-2'}/>
-                                 <span>
+                            ) : (
+                                state.sponsors.length === 0 &&
+                                <button className={'outlined-btn'} onClick={() => dispatch(addNewSponsor())}>
+                                    <Icon icon={'add'} className={'mr-2'}/>
+                                    <span>
                                      Add Sponsor
                                  </span>
-                             </button>
-                         )
-                     }
-                 </div>
-                 <button className={"btn"} onClick={()=> {
-                     axios.post('/event', {title: eventTitle, school: schoolId, start: data.startDate, end: data.endDate, players, sponsor}).then((res)=> console.log(res))
-                 }}>
-                     Create Event Link
-                 </button>
-                 <div className={'h-10'}>
+                                </button>
+                            )
+                        }
+                    </div>
+                    <button className={"btn"} onClick={() => {
+                        setLoading(true)
+                        axios.post('/event', {
+                            title: state.event.eventTitle,
+                            school: state.event.schoolId,
+                            start: state.event.start,
+                            end: state.event.end,
+                            players: state.players,
+                            sponsor: state.sponsors[0]
+                        }).then((res) => {
+                            setLoading(false)
+                            router.push(`/${res.data.event.slug}`)
+                        }).catch(err =>{
+                            setLoading(false)
+                        })
+                    }}>
+                        Create Event Link
+                    </button>
+                    <div className={'h-10'}>
 
-                 </div>
-             </div>
-          {/*
-                Form collects event title
-                form creates player or adds player
-                form creates school or adds school
-                forms creates sponsor or adds sponsor
-          */}
+                    </div>
+                </div>
 
-          </div>
+            </div>
 
-      </BaseLayout>
-  )
+        </BaseLayout>
+        </>
+    )
 }
 
 export default NewEvent
@@ -342,7 +370,7 @@ export const getServerSideProps = async () => {
     return {
         props: {
             schools: res.data.schools,
-            sponsor: res.data.sponsor[0]
+            sponsors: res.data.sponsors
         }
     }
 }

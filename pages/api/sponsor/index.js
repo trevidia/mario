@@ -1,30 +1,32 @@
 import prisma from "../../../lib/prisma";
 
 const handler = async (req, res) => {
+    let sponsors
     try {
         switch (req.method) {
             case "GET":
-                const sponsors = await prisma.sponsor.findMany()
+                sponsors = await prisma.sponsor.findMany()
                 return res.json(sponsors)
             case "POST":
-                const {firstName, lastName, middleName, title, links} = req.body
-                if (!(firstName && lastName)) return res.status(400).json({message: "Invalid Input"})
+                const {name, links} = req.body
+                if (!(name)) return res.status(400).json({message: "Invalid Input"})
                 let data
                 if (links){
                     data = {
-                        firstName, lastName, middleName, title, links: {
+                        name, links: {
                             create: links.map(link => {return {url: link}})
                         }
                     }
                 } else {
                     data = {
-                        firstName, lastName, middleName, title
+                        name
                     }
                 }
-                const sponsor = await prisma.sponsor.create({
+                await prisma.sponsor.create({
                     data
                 })
-                return res.status(201).json({message: "Success", sponsor})
+                sponsors = await prisma.sponsor.findMany()
+                return res.status(201).json({message: "Success", sponsors })
             default:
                 return res.status(405).json({message: "Method not allowed"})
         }

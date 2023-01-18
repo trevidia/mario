@@ -4,7 +4,7 @@ import Link from "next/link";
 import Icon from "../components/Icon";
 import Loading from "../components/Loading";
 
-const Event = ({links, players, event, hasVoted}) => {
+const Event = ({links, players, event,}) => {
     const [sponsorLinks, setSponsorLinks] = useState(links.map(link => {
         return {url: link.url, clicked: false}
     }))
@@ -13,6 +13,7 @@ const Event = ({links, players, event, hasVoted}) => {
     const [proceed, setProceed] = useState(false)
     const [vote, setVote] = useState({iusr: "", playerId: null})
     const [loading, setLoading] = useState(false)
+    const [hasVoted, setHasVoted] = useState(false)
 
     return (
         <>
@@ -25,11 +26,11 @@ const Event = ({links, players, event, hasVoted}) => {
                 </div>
                 {
                     hasVoted ? (
-                        <div className={'z-10'}>
-                            You have voted already.
+                        <div className={'z-10 text-3xl'}>
+                            You have voted already. Wait for another event By <span className={'uppercase font-bold'}> Mario</span>
                         </div>
                     ) : (
-                        <div className={'lg:w-2/5 md:w-3/5 w-full z-10'}>
+                        <div className={'lg:w-4/5 w-full z-10 overflow-y-auto'}>
                             <h3 className={'text-center text-3xl text-zinc-800 mb-5'}>
                                 {event.title}
 
@@ -79,6 +80,15 @@ const Event = ({links, players, event, hasVoted}) => {
                                                     } else if (username.length === 0){
                                                         setError("Input your username for verification")
                                                     }
+                                                    setLoading(true)
+                                                    axios.get(`/event/${event.slug}/${username}`)
+                                                        .then((res)=> {
+                                                            setHasVoted(res.data.hasVoted)
+                                                            setLoading(false)
+                                                        }).catch((err)=> {
+                                                            setLoading(false)
+                                                            console.log(err)
+                                                    })
                                                 }}>
                                             Proceed
                                         </button>
@@ -98,14 +108,16 @@ const Event = ({links, players, event, hasVoted}) => {
                                                 console.log(player)
                                                 return <div key={index} className={'bg-white px-3 py-2 flex flex-col gap-2 items-center rounded-md drop-shadow'}>
                                                     <img src={`https://ballonmario.s3.eu-west-3.amazonaws.com/${player.image}`} className={'h-36 rounded w-36 object-cover'} alt={`${player.firstName}'s picture`}/>
-                                                    <span>{player.firstName} {player.lastName}</span>
+                                                    <span className={'text-xl'}>{player.name}</span>
+                                                    <span>{player.department}</span>
                                                     <button className={'bg-fuchsia-400 rounded-full w-full py-2 mb-2 flex items-center justify-center text-white hover:bg-fuchsia-500 transition-colors'} onClick={()=> {
                                                         const data = {...vote, playerId: id}
                                                         setVote(data)
                                                         setLoading(true)
                                                         axios.post('/player/vote', data).then((res)=>{
                                                             setLoading(false)
-                                                            window.cookieStore.set('vote', JSON.stringify(data))
+                                                            setHasVoted(true)
+                                                            console.log(res)
                                                         }).catch((err)=> setLoading(false))
                                                     }
                                                     }>
@@ -133,8 +145,13 @@ export const getServerSideProps = async (context) => {
     const {vote} = context.req.cookies
     let hasVoted = false
     let notFound = false
+    console.log(context.req.cookies)
     const res = await axios.get(`/event/${slug}`).catch((err) => notFound = true)
-    let playerVotedFor = vote && JSON.parse(vote).playerId
+    let playerVotedFor
+    if (vote){
+        playerVotedFor = JSON.parse(vote).playerId
+        console.log(playerVotedFor)
+    }
 
     res.data.event.eventPlayers.forEach(player => {
         if (player.id === playerVotedFor){

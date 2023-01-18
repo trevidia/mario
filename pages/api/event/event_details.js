@@ -5,14 +5,15 @@ const handler = async (req, res) => {
         switch (req.method) {
             case "GET":
                 const schools = await prisma.school.findMany()
-                const sponsor = await prisma.sponsor.findMany(
+                const sponsors = await prisma.sponsor.findMany(
                     {
                         include: {
                             links: true
                         }
                     }
                 )
-                return res.json({schools, sponsor})
+
+                return res.json({schools, sponsors})
             default:
                 return res.status(405).json({message: "Method not allowed"})
         }
