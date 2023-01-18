@@ -142,22 +142,10 @@ export default Event
 
 export const getServerSideProps = async (context) => {
     const slug = context.params.event
-    const {vote} = context.req.cookies
-    let hasVoted = false
+    console.log(slug)
     let notFound = false
     console.log(context.req.cookies)
     const res = await axios.get(`/event/${slug}`).catch((err) => notFound = true)
-    let playerVotedFor
-    if (vote){
-        playerVotedFor = JSON.parse(vote).playerId
-        console.log(playerVotedFor)
-    }
-
-    res.data.event.eventPlayers.forEach(player => {
-        if (player.id === playerVotedFor){
-            hasVoted = true
-        }
-    })
 
 
     if (notFound) {
@@ -171,7 +159,6 @@ export const getServerSideProps = async (context) => {
             links: res.data.links,
             players: res.data.event.eventPlayers,
             event: res.data.event,
-            hasVoted
         }
     }
 }
