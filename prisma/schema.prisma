@@ -12,7 +12,7 @@ datasource db {
 
 model Sponsor {
   sid             Int            @id @default(autoincrement())
-  name       String
+  name            String
   links           Link[]
   sponsoredEvents EventSponsor[]
 }
@@ -40,7 +40,7 @@ model Event {
   eid           Int            @id @default(autoincrement())
   title         String         @map("event_title")
   school        School         @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
-  image String?
+  image         String?
   schoolId      Int            @map("schId")
   slug          String         @default(cuid())
   start         DateTime       @map("event_date")
@@ -59,8 +59,8 @@ model EventSponsor {
 
 model Player {
   pid              Int           @id @default(autoincrement())
-  name        String
-  department         String
+  name             String
+  department       String
   image            String        @db.Text
   school           School        @relation(fields: [schoolId], references: [schId], onUpdate: Cascade)
   schoolId         Int           @map("schId")
