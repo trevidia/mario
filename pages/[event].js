@@ -21,16 +21,22 @@ const Event = ({links, players, event,}) => {
                 loading && <Loading/>
             }
             <div className={"relative bg-gradient-to-tr from-fuchsia-400 to-cyan-300 h-screen w-screen py-8 flex justify-center px-6 overflow-y-auto"}>
-                <img className={'h-screen inset-x-0 top-0 w-full  absolute backdrop-blur bg-white/40 z-0 object-cover'} src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${event.image}`} alt={"event image"}>
+                <div className={'h-screen inset-x-0 top-0 fixed backdrop-blur bg-white/40 z-0 '}>
 
-                </img>
+                </div>
                 {
                     hasVoted ? (
+                        <div className={'flex flex-col items-center gap-8'}>
+                            <h2 className={'text-4xl z-10'}>
+                                {event.title}
+                            </h2>
                         <div className={'z-10 text-3xl'}>
                             You have voted already. Wait for another event By <span className={'uppercase font-bold'}> Mario</span>
                         </div>
+                        <img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${event.image}`} alt={'event flyer'} className={"h-[300px] w-[300px] object-cover z-10"}/>
+                    </div>
                     ) : (
-                        <div className={'lg:w-4/5 w-full z-10 overflow-y-auto'}>
+                        <div className={'lg:w-4/5 w-full z-10 '}>
                             <h3 className={'text-center text-3xl text-zinc-800 mb-5'}>
                                 {event.title}
 
@@ -106,6 +112,7 @@ const Event = ({links, players, event,}) => {
                                         }
                                     </>
                                 ) : (
+                                    <>
                                     <div className={'flex justify-center gap-5 flex-wrap'}>
                                         {
                                             players.map(({player, id}, index)=> {
@@ -131,6 +138,10 @@ const Event = ({links, players, event,}) => {
                                             })
                                         }
                                     </div>
+                                        <div className={"h-20 w-full"}>
+
+                                        </div>
+                                    </>
                                 )
                             }
                         </div>
