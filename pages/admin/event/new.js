@@ -134,7 +134,7 @@ const NewEvent = (props) => {
                         {
                             state.players.map((player, index) => (
                                 <div className={'flex mb-4 bg-zinc-200 p-2 rounded-md'} key={index}>
-                                    <img src={`https://ballonmario.s3.eu-west-3.amazonaws.com/${player.image}`}
+                                    <img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`}
                                          className={"h-20 w-20 mr-3 object-cover rounded-md drop-shadow"}
                                          alt={`Image of ${player.name}`}/>
                                     <div className={'flex flex-col'}>

@@ -32,6 +32,7 @@ model User {
 model Link {
   lid       Int     @id @default(autoincrement())
   url       String  @db.Text
+  clicked   Int     @default(0)
   sponsor   Sponsor @relation(fields: [sponsorId], references: [sid], onUpdate: Cascade)
   sponsorId Int     @map("sid")
 }
@@ -77,7 +78,7 @@ model School {
 model Vote {
   vid      Int         @id @default(autoincrement())
   iusr     String      @map("instagram_username")
-  player   EventPlayer @relation(fields: [playerId], references: [id], onUpdate: Cascade)
+  player   EventPlayer @relation(fields: [playerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   playerId Int         @map("pid")
 }
 
@@ -85,7 +86,7 @@ model EventPlayer {
   id       Int    @id @default(autoincrement())
   event    Event  @relation(fields: [eventId], references: [eid], onUpdate: Cascade)
   eventId  Int    @map("eid")
-  player   Player @relation(fields: [playerId], references: [pid], onUpdate: Cascade)
+  player   Player @relation(fields: [playerId], references: [pid], onUpdate: Cascade, onDelete: Cascade)
   playerId Int    @map("pid")
   votes    Vote[]
 }

@@ -1,26 +1,28 @@
-const SponsorCard = () => {
+import Link from "next/link";
+
+const SponsorCard = ({sponsor}) => {
     return (
         <div className={'mb-3'}>
             <h5 className={"text-xl mb-2"}>
-                Okwor Promise
+                {sponsor.name}
             </h5>
             <div>
-                <div className={"flex"}>
-                    <span className={'flex-1 text-sky-500 underline'}>
-                        Link
-                    </span>
-                    <span>
-                        clicked 39 times
-                    </span>
-                </div>
-                <div className={'flex'}>
-                    <span className={'flex-1 text-sky-500 underline'}>
-                        Link
-                    </span>
-                    <span>
-                        clicked 39 times
-                    </span>
-                </div>
+                {
+                    sponsor.links.map((link, index)=>{
+                        return (
+                            <div className={"flex"}>
+                                <span className={'flex-1 text-sky-500 underline truncate'}>
+                                    <Link href={link.url} target={'_blank'} rel={'noopener noreferrer'}>
+                                        {link.url}
+                                    </Link>
+                                </span>
+                                <span className={''}>
+                                    clicked {link.clicked} times
+                                </span>
+                            </div>
+                        )
+                    })
+                }
             </div>
         </div>
     )

@@ -6,7 +6,7 @@ import Loading from "../components/Loading";
 
 const Event = ({links, players, event,}) => {
     const [sponsorLinks, setSponsorLinks] = useState(links.map(link => {
-        return {url: link.url, clicked: false}
+        return {url: link.url, clicked: false, lid: link.lid}
     }))
     const [error, setError] = useState("")
     const [username, setUsername] = useState("")
@@ -20,10 +20,10 @@ const Event = ({links, players, event,}) => {
             {
                 loading && <Loading/>
             }
-            <div className={"relative bg-gradient-to-tr from-fuchsia-400 to-cyan-300 h-screen w-screen py-8 flex justify-center px-6 overflow-clip"}>
-                <div className={'h-screen inset-x-0 top-0 absolute backdrop-blur bg-white/40 z-0'}>
+            <div className={"relative bg-gradient-to-tr from-fuchsia-400 to-cyan-300 h-screen w-screen py-8 flex justify-center px-6 overflow-y-auto"}>
+                <img className={'h-screen inset-x-0 top-0 w-full  absolute backdrop-blur bg-white/40 z-0 object-cover'} src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${event.image}`} alt={"event image"}>
 
-                </div>
+                </img>
                 {
                     hasVoted ? (
                         <div className={'z-10 text-3xl'}>
@@ -47,14 +47,18 @@ const Event = ({links, players, event,}) => {
                                                 <Link href={link.url} target={'_blank'} rel={'noopener noreferrer'} key={index}>
                                                     <div
                                                         className={'py-2 bg-zinc-200/80 rounded my-2 px-3 flex items-center justify-between'}
-                                                        onClick={() => setSponsorLinks(prevState => {
-                                                            let state = prevState
-                                                            state[index].clicked = true
-                                                            return [...state]
-                                                        })}>
-                                            <span className={'w-2/3 truncate'}>
-                                                {link.url}
-                                            </span>
+                                                        onClick={async () => {
+                                                            setSponsorLinks(prevState => {
+                                                                let state = prevState
+                                                                state[index].clicked = true
+                                                                return [...state]
+                                                            })
+                                                            console.log(link)
+                                                            await axios.get(`/link/${link.lid}`)
+                                                        }}>
+                                                        <span className={'w-2/3 truncate'}>
+                                                            {link.url}
+                                                        </span>
                                                         <Icon icon={'link'} className={'mr-3'}/>
                                                     </div>
                                                 </Link>

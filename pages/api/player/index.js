@@ -2,14 +2,9 @@ import prisma from "../../../lib/prisma";
 import AWS from "aws-sdk"
 import formidable from 'formidable'
 import * as fs from 'node:fs'
+import s3Client from "../../../lib/aws";
 
-const s3Client = new AWS.S3({
-    region: "eu-west-3",
-    credentials: {
-        accessKeyId: process.env.ACCESS_KEY_ID,
-        secretAccessKey: process.env.SECRET_ACCESS_KEY
-    }
-})
+
 
 const formParser = (req)=>{
     return new Promise(async (resolve, reject) => {

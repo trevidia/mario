@@ -4,8 +4,35 @@ const handler = async (req, res) => {
     try {
         switch (req.method) {
             case "GET":
-                const events = await prisma.event.findMany()
-                return res.json(events)
+                const events = await prisma.event.findMany({
+                    include: {
+                        eventSponsors: {
+                            select: {
+                                sponsor: {
+                                    include:{
+                                        links: true
+                                    }
+                                },
+                            }
+                        },
+                        eventPlayers: {
+                            orderBy:{
+                              votes: {
+                                  _count: 'desc'
+                              }
+                            },
+                            select: {
+                                player: true,
+                                _count: {
+                                    select: {
+                                        votes: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+                return res.json({events})
             case "POST":
                 const {title, school, start, end, players, sponsor} = req.body
                 if (!(title && school && start && end)) return res.status(400).json({message: "Invalid Input"})
@@ -28,7 +55,9 @@ const handler = async (req, res) => {
                     }
                 })
                 console.log(eventSponsor)
-                const many = players.map(player => {return {eventId: event.eid, playerId: player.pid}})
+                const many = players.map(player => {
+                    return {eventId: event.eid, playerId: player.pid}
+                })
                 console.log(many)
                 const eventPlayers = await prisma.eventPlayer.createMany({
                     data: many
