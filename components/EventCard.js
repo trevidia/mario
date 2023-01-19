@@ -16,7 +16,10 @@ const EventCard = ({event, dispatch, selected}) => {
                       event.title
                   }
               </h4>
-              <Icon icon={'share'} className={''} onClick={()=> {toast('Copied')}}/>
+              <Icon icon={'share'} className={''} onClick={async () => {
+                  await navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL}/${event.slug}`)
+                  toast('Copied')
+              }}/>
           </div>
           <div className={'flex items-center'}>
               <Ping size={'h-3 w-3 mr-2'}/>
