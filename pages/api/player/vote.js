@@ -1,3 +1,4 @@
+import prisma from "../../../lib/prisma";
 
 const handler = async (req, res) => {
     try {
