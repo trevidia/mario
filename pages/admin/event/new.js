@@ -38,7 +38,7 @@ const NewEvent = (props) => {
         <BaseLayout>
             <div
                 className={'w-full h-full rounded-md bg-white mb-3 drop-shadow px-4 py-6 flex justify-center overflow-y-auto'}>
-                <div className={'w-3/5'}>
+                <div className={'w-4/5 lg::w-3/5'}>
                     <div className={'border-b py-3 mb-2'}>
                         <h4 className={"text-2xl mb-3"}>
                             Event
@@ -237,7 +237,7 @@ const NewEvent = (props) => {
                                     <div className={'flex flex-col'}>
                                         {
                                             sponsor.links.map((link, linkId) => <span
-                                                className={'p-1 rounded bg-zinc-200 my-1'}
+                                                className={'p-1 rounded bg-zinc-200 my-1 truncate'}
                                                 key={linkId}>{link.url}</span>)
                                         }
                                     </div>

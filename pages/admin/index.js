@@ -31,10 +31,12 @@ const Admin = ({events})=>{
                 </div>
             </div>
             <div className={'flex h-14 justify-between items-center'}>
-                <div className={'flex items-center px-3 py-2 hover:bg-zinc-200 cursor-pointer rounded-md'}>
+                <Link href={'/admin/event/new'}>
+                    <div className={'flex items-center px-3 py-2 hover:bg-zinc-200 cursor-pointer rounded-md'}>
                         <Icon icon={'add'} className={'mr-2'}/>
-                    <span>create event</span>
-                </div>
+                        <span>create event</span>
+                    </div>
+                </Link>
                 {
                     state.selectedEvent && <div className={'underline cursor-pointer'}>
                         <Link href={`/admin/event/${state.events.find(event => event.eid === state.selectedEvent).slug}`}>
