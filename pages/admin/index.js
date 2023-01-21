@@ -7,6 +7,7 @@ import Icon from "../../components/Icon";
 import axios from "../../lib/axios";
 import {dashBoardReducer, dashStateInitializer} from "../../lib/dashBoardReducer";
 import Link from "next/link";
+import {AddOutlined} from "@mui/icons-material";
 
 
 const Admin = ({events})=>{
@@ -22,7 +23,7 @@ const Admin = ({events})=>{
 
     return (
         <BaseLayout>
-            <div className={'flex h-10 w-max'}>
+            <div className={'flex h-10 w-max flex-none'}>
                 <div className={`tab ${tab === "Events" ? 'bg-zinc-300': "bg-transparent"} transition-all`} onClick={()=>setTab("Events")}>
                     Events
                 </div>
@@ -30,10 +31,10 @@ const Admin = ({events})=>{
                     Previous Events
                 </div>
             </div>
-            <div className={'flex h-14 justify-between items-center'}>
+            <div className={'flex h-14 justify-between items-center flex-none'}>
                 <Link href={'/admin/event/new'}>
                     <div className={'flex items-center px-3 py-2 hover:bg-zinc-200 cursor-pointer rounded-md'}>
-                        <Icon icon={'add'} className={'mr-2'}/>
+                        <AddOutlined className={'mr-2'}/>
                         <span>create event</span>
                     </div>
                 </Link>
@@ -45,7 +46,7 @@ const Admin = ({events})=>{
                     </div>
                 }
             </div>
-            <div className={'flex h-52 py-3 w-full overflow-x-clip px-2'}>
+            <div className={'flex h-max py-3 mb-3 w-full overflow-x-scroll overflow-y-hidden px-2 flex-none'}>
                 {
                     state.events.map((event, index)=>{
                         return <EventCard key={index} event={event} dispatch={dispatch} selected={state.selectedEvent}/>
@@ -54,12 +55,12 @@ const Admin = ({events})=>{
             </div>
             {
                 state.selectedEvent ? (
-                    <div className={'flex mb-3 h-1/2 flex-wrap sm:flex-nowrap'}>
-                        <div className={'sm:h-full w-full h-72 bg-white sm:mr-5 mr-0 sm:mb-0 mb-3 rounded-md drop-shadow  px-5 py-4 overflow-clip flex flex-col'}>
+                    <div className={'flex mb-3 h-1/2 flex-wrap md:flex-nowrap shrink pb-5 md:items-stretch'}>
+                        <div className={'md:h-full w-full min-h-[250px] h-72 bg-white md:mr-2 mr-0 md:mb-0 mb-3 rounded-md drop-shadow  px-5 py-4 flex flex-col'}>
                             <h3 className={"capitalize bg-gunmetal/20  w-max p-2 mb-5 rounded"}>
                                 top 3 players
                             </h3>
-                            <div className={'overflow-y-auto h-full'}>
+                            <div className={'overflow-y-auto h-full shrink'}>
                                 {
                                     state.events.find((event) => event.eid === state.selectedEvent).top3.map(({player, _count}, index, players)=> {
                                         const totalVotes = players.reduce((previousValue, currentValue, currentIndex) => {
@@ -75,7 +76,7 @@ const Admin = ({events})=>{
                                 }
                             </div>
                         </div>
-                        <div className={'sm:h-full w-full h-72 bg-white sm:ml-5 ml-0 rounded-md drop-shadow px-5 py-4 overflow-clip flex flex-col'}>
+                        <div className={'md:h-full h-72 min-h-[250px] w-full bg-white md:ml-2 ml-0 rounded-md drop-shadow px-5 py-4 overflow-clip flex flex-col'}>
                             <h3 className={"capitalize bg-gunmetal/20  w-max p-2 mb-5 rounded"}>
                                 Sponsors
                             </h3>
@@ -92,7 +93,7 @@ const Admin = ({events})=>{
                                 }
                             </div>
                         </div>
-                        <div className={'h-3 w-3 sm:hidden'}>
+                        <div className={'h-10 w-3 sm:hidden'}>
 
                         </div>
 

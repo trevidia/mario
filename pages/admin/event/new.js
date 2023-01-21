@@ -1,41 +1,33 @@
 import BaseLayout from "../../../components/BaseLayout";
-import {useEffect, useReducer, useState} from "react";
-import Icon from "../../../components/Icon";
 import axios from "../../../lib/axios";
 import {
     addNewPlayer,
     addNewSchool, addNewSponsor, addNewSponsorLink, editNewSponsorLink,
-    eventReducer,
-    initEvent, setEndDate,
-    setEventTitle,
+    setEndDate, setEventImage,
+    setEventTitle, setLoading,
     setNewSchool, setPlayerDepartment, setPlayerImage, setPlayerName, setPlayers, setSchoolId,
     setSchools, setSponsorName, setSponsors, setStartDate
 } from "../../../lib/eventReducer";
-import Loading from "../../../components/Loading";
-import {useRouter} from "next/router";
+import Loading from "../../../components/Loading"
+import {AddOutlined, CancelOutlined, DeleteOutline, SaveOutlined} from "@mui/icons-material";
+import SchoolDropDown from "../../../components/SchoolDropDown";
+import LabelInput from "../../../components/LabelInput";
+import SuccessLinkModal from "../../../components/SuccessLinkModal";
+import {useEventState} from "../../../lib/hooks";
+import PlayerCard from "../../../components/PlayerCard";
 
 const NewEvent = (props) => {
-    console.log(props)
-    const [state, dispatch] = useReducer(eventReducer, {schools: props.schools, sponsors: props.sponsors}, initEvent)
-    const [loading, setLoading] = useState(false)
-    const router = useRouter()
+    const {state, dispatch, handleCreateEvent, handleAddPlayer} = useEventState({schools: props.schools, sponsors: props.sponsors})
 
-    useEffect(() => {
-        if (state.event.schoolId) {
-            setLoading(true)
-            axios.get(`/school/${state.event.schoolId}/players`).then((res) => {
-                dispatch(setPlayers(res.data.players))
-                setLoading(false)
-            }).catch((err)=> setLoading(false))
-        }
-    }, [state.event.schoolId])
 
     return (
         <>
             {
-                loading && <Loading/>
+                state.loading && <Loading/>
             }
         <BaseLayout>
+            <SuccessLinkModal link={state.eventLink} openState={{isOpen: state.dialogModalOpen, dispatch}}/>
+
             <div
                 className={'w-full h-full rounded-md bg-white mb-3 drop-shadow px-4 py-6 flex justify-center overflow-y-auto'}>
                 <div className={'w-4/5 lg::w-3/5'}>
@@ -43,13 +35,11 @@ const NewEvent = (props) => {
                         <h4 className={"text-2xl mb-3"}>
                             Event
                         </h4>
-                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                            <h6 className={'input-label'}>
-                                Event title
-                            </h6>
-                            <input type={'text'} className={'input'} value={state.event.eventTitle}
-                                   onChange={(e) => dispatch(setEventTitle(e.target.value))}/>
-                        </div>
+                        <LabelInput
+                            label={"Event title"}
+                            value={state.event.eventTitle}
+                            onChange={(e) => dispatch(setEventTitle(e.target.value))}
+                        />
                         <div className={'w-full flex justify-between mb-3 flex-wrap'}>
                          <span className={'input-label'}>
                              {
@@ -57,17 +47,15 @@ const NewEvent = (props) => {
                          </span>
                             {
                                 !state.addSchool ? (
-                                    <select className={'input h-10 bg-white'} value={state.event.schoolId}
-                                            onChange={(e) => dispatch(setSchoolId(parseInt(e.target.value)))}>
-                                        <option defaultValue hidden>Select School</option>
-                                        {
-                                            state.schools.map((mapSchool, index) => (
-                                                <option key={index} value={mapSchool.schId}>{mapSchool.name}</option>
-                                            ))
-                                        }
-                                    </select>
-                                ) : <input type={'text'} className={'input'} value={state.newSchool}
-                                           onChange={(e) => dispatch(setNewSchool(e.target.value))}/>
+                                    <SchoolDropDown dispatch={dispatch} schools={state.schools}/>
+                                ) : (
+                                    <input
+                                        type={'text'}
+                                        className={'input'}
+                                        value={state.newSchool}
+                                        onChange={(e) => dispatch(setNewSchool(e.target.value))}
+                                    />
+                                )
                             }
                         </div>
                         {
@@ -75,110 +63,92 @@ const NewEvent = (props) => {
                                 <button
                                     className={'outlined-btn'}
                                     onClick={() => dispatch(addNewSchool())}>
-                                    <Icon icon={'add'} className={'mr-2'}/>
+                                    <AddOutlined className={'mr-2'}/>
                                     <span className={''}>
-                                 Add School
-                             </span>
+                                        Add School
+                                    </span>
                                 </button> : (
                                     <div className={"flex"}>
                                         <button className={'outlined-btn mr-2'} onClick={() => {
                                             dispatch(setSchools(state.schools))
                                         }}>
-                                            <Icon icon={'cancel'} className={'mr-2'}/>
+                                            <CancelOutlined className={'mr-2'}/>
                                             <span>
-                                         Cancel Add School
-                                     </span>
+                                                Cancel Add School
+                                            </span>
                                         </button>
                                         <button className={'outlined-btn'}
                                                 onClick={() => {
-                                                    setLoading(true)
+                                                    dispatch(setLoading(true))
                                                     axios.post('/school', {schoolName: state.newSchool}).then((res) => {
 
                                                         dispatch(setSchools(res.data.schools))
                                                         dispatch(setSchoolId(res.data.school.schId))
                                                         console.log(res)
-                                                        setLoading(false)
+                                                        dispatch(setLoading(false))
                                                     }).catch((err)=>{
-                                                        setLoading(false)
+                                                        dispatch(setLoading(false))
                                                     })
                                                 }
                                                 }>
-                                            <Icon icon={'save'} className={'mr-2'}/>
+                                            <SaveOutlined className={'mr-2'}/>
                                             <span>
-                                         Save School
-                                     </span>
+                                                Save School
+                                            </span>
                                         </button>
-
                                     </div>
                                 )
                         }
-                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                            <span className={'input-label'}>Start Date</span>
-                            <input
-                                className={'input'}
-                                type={'datetime-local'}
-                                value={state.event.start}
-                                onChange={
-                                    (e) => dispatch(setStartDate(e.target.value))}/>
-                        </div>
-                        <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                            <span className={'input-label'}>End Date</span>
-                            <input className={'input'} type={'datetime-local'} value={state.event.end}
-                                   onChange={(e) => dispatch(setEndDate(e.target.value))}/>
-                        </div>
+                        <LabelInput
+                            type={'file'}
+                            label={"Event flyer"}
+                            value={state.event.imageName}
+                            onChange={(e) => dispatch(setEventImage({
+                                imageName: e.target.value,
+                                image: e.target.files[0]
+                            }))}/>
+                        <LabelInput
+                            label={"Start Date"}
+                            type={'datetime-local'}
+                            value={state.event.start}
+                            onChange={(e) => dispatch(setStartDate(e.target.value))}
+                            />
+                        <LabelInput
+                            label={"End Date"}
+                            type={'datetime-local'}
+                            value={state.event.end}
+                            onChange={(e) => dispatch(setEndDate(e.target.value))}
+                            />
                     </div>
                     <div className={'border-b py-3 mb-2'}>
                         <h2 className={'text-2xl mb-3'}>
                             Players
                         </h2>
                         {
-                            state.players.map((player, index) => (
-                                <div className={'flex mb-4 bg-zinc-200 p-2 rounded-md'} key={index}>
-                                    <img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`}
-                                         className={"h-20 w-20 mr-3 object-cover rounded-md drop-shadow"}
-                                         alt={`Image of ${player.name}`}/>
-                                    <div className={'flex flex-col'}>
-                                        <span className={'capitalize text-xl mb-3 text-zinc-900'}>
-                                     {
-                                         player.name
-                                     }
-                                 </span>
-                                        <span>
-                                            {
-                                                player.department
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-                            ))
+                            state.players.map((player, index) => <PlayerCard player={player} key={index}/>)
                         }
                         {
                             state.addPlayer && (
                                 <>
-                                    <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Name
-                                 </span>
-                                        <input type={'text'} className={'input'} value={state.newPlayer.name}
-                                               onChange={(e) => dispatch(setPlayerName(e.target.value))}/>
-                                    </div>
-                                    <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Department
-                                 </span>
-                                        <input type={'text'} className={'input'} value={state.newPlayer.department}
-                                               onChange={(e) => dispatch(setPlayerDepartment(e.target.value))}/>
-                                    </div>
-                                    <div className={'flex justify-between mb-3 flex-wrap'}>
-                                     <span className={'input-label'}>
-                                     Picture
-                                 </span>
-                                        <input type={'file'} className={'file-input'}
-                                               onChange={(e) => dispatch(setPlayerImage({
-                                                   imageName: e.target.value,
-                                                   image: e.target.files[0]
-                                               }))} value={state.newPlayer.imageName} accept={'image/*'}/>
-                                    </div>
+                                    <LabelInput
+                                        label={"Name"}
+                                        value={state.newPlayer.name}
+                                        onChange={(e) => dispatch(setPlayerName(e.target.value))}
+                                    />
+                                    <LabelInput
+                                        label={"Department"}
+                                        value={state.newPlayer.department}
+                                        onChange={(e) => dispatch(setPlayerDepartment(e.target.value))}
+                                    />
+                                    <LabelInput
+                                        label={"Picture"}
+                                        type={'file'}
+                                        value={state.newPlayer.imageName}
+                                        onChange={(e) => dispatch(setPlayerImage({
+                                            imageName: e.target.value,
+                                            image: e.target.files[0]
+                                        }))}
+                                    />
                                 </>
                             )
                         }
@@ -187,32 +157,13 @@ const NewEvent = (props) => {
                                 <div className={'flex'}>
                                     <button className={'outlined-btn mr-2'}
                                             onClick={() => dispatch(setPlayers(state.players))}>
-                                        <Icon icon={'cancel'} className={'mr-2'}/>
+                                        <CancelOutlined className={'mr-2'}/>
                                         <span>Cancel Add Player</span>
                                     </button>
                                     {
                                         state.newPlayer.name && state.newPlayer.department && state.newPlayer.image && (
-                                            <button className={'outlined-btn'} onClick={() => {
-
-                                                let formData = new FormData()
-                                                formData.append('image', state.newPlayer.image)
-                                                formData.append('name', state.newPlayer.name)
-                                                formData.append('department', state.newPlayer.department)
-                                                formData.append('school', state.event.schoolId)
-                                                setLoading(true)
-                                                axios.post('/player', formData, {
-                                                    headers: {
-                                                        "Content-Type": "multipart/form-data"
-                                                    }
-                                                }).then(r => {
-                                                    dispatch(setPlayers(r.data.players))
-                                                    setLoading(false)
-                                                }).catch(error => {
-                                                    console.log(error)
-                                                    setLoading(false)
-                                                })
-                                            }}>
-                                                <Icon icon={'add'} className={'mr-2'}/>
+                                            <button className={'outlined-btn'} onClick={handleAddPlayer}>
+                                                <AddOutlined className={'mr-2'}/>
                                                 <span>Add</span>
                                             </button>
                                         )
@@ -220,7 +171,7 @@ const NewEvent = (props) => {
                                 </div>
                             ) : (
                                 <button className={'outlined-btn'} onClick={() => dispatch(addNewPlayer())}>
-                                    <Icon icon={'add'} className={'mr-2'}/>
+                                    <AddOutlined className={'mr-2'}/>
                                     <span>Add player</span>
                                 </button>
                             )
@@ -247,15 +198,11 @@ const NewEvent = (props) => {
                         {
                             state.addSponsor && (
                                 <>
-
-                                    <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Name
-                                 </span>
-                                        <input type={'text'} className={'input'} value={state.newSponsor.name}
-                                               onChange={(e) => dispatch(setSponsorName(e.target.value))}/>
-                                    </div>
-
+                                    <LabelInput
+                                        label={"Name"}
+                                        value={state.newSponsor.name}
+                                        onChange={(e) => dispatch(setSponsorName(e.target.value))}
+                                        />
                                     {
                                         state.newSponsor.links.map((link, index) => (
                                             <div className={'flex justify-between mb-3 flex-wrap relative'} key={index}>
@@ -275,7 +222,7 @@ const NewEvent = (props) => {
                                                                 onClick={() => setLinks(prevState => {
                                                                     return [...prevState.filter((val, prevIndex) => prevIndex !== index)]
                                                                 })}>
-                                                             <Icon icon={'delete'}/>
+                                                                <DeleteOutline/>
                                                          </span>
                                                         )
                                                     }
@@ -284,7 +231,7 @@ const NewEvent = (props) => {
                                                             <span
                                                                 className={"h-8 w-8 border border-fuchsia-800 flex items-center justify-center text-fuchsia-800 rounded-full"}
                                                                 onClick={() => dispatch(addNewSponsorLink())}>
-                                                             <Icon icon={'add'}/>
+                                                                <AddOutlined/>
                                                          </span>
                                                         )
                                                     }
@@ -298,23 +245,24 @@ const NewEvent = (props) => {
                         {
                             state.addSponsor ? (
                                 <div className={'flex'}>
-                                    <button className={'outlined-btn mr-2'}
-                                            onClick={() => dispatch(setSponsors(state.sponsors))}>
-                                        <Icon icon={'cancel'} className={'mr-2'}/>
+                                    <button
+                                        className={'outlined-btn mr-2'}
+                                        onClick={() => dispatch(setSponsors(state.sponsors))}>
+                                        <CancelOutlined className={'mr-2'}/>
                                         <span>
-                             Cancel Add Sponsor
-                         </span>
+                                            Cancel Add Sponsor
+                                        </span>
                                     </button>
                                     <button className={'outlined-btn'} onClick={() => {
-                                        setLoading(true)
+                                        dispatch(setLoading(true))
                                         axios.post('/sponsor', {...state.newSponsor}).then((res) => {
                                             dispatch(setSponsors(res.data.sponsors))
-                                            setLoading(false)
+                                            dispatch(setLoading(false))
                                         }).catch((err)=> {
-                                            setLoading(false)
+                                            dispatch(setLoading(false))
                                         })
                                     }}>
-                                        <Icon icon={'add'} className={'mr-2'}/>
+                                        <AddOutlined className={'mr-2'}/>
                                         <span>
                                      Add
                                  </span>
@@ -324,7 +272,7 @@ const NewEvent = (props) => {
                             ) : (
                                 state.sponsors.length === 0 &&
                                 <button className={'outlined-btn'} onClick={() => dispatch(addNewSponsor())}>
-                                    <Icon icon={'add'} className={'mr-2'}/>
+                                    <AddOutlined className={'mr-2'}/>
                                     <span>
                                      Add Sponsor
                                  </span>
@@ -332,22 +280,7 @@ const NewEvent = (props) => {
                             )
                         }
                     </div>
-                    <button className={"btn"} onClick={() => {
-                        setLoading(true)
-                        axios.post('/event', {
-                            title: state.event.eventTitle,
-                            school: state.event.schoolId,
-                            start: state.event.start,
-                            end: state.event.end,
-                            players: state.players,
-                            sponsor: state.sponsors[0]
-                        }).then((res) => {
-                            setLoading(false)
-                            router.push(`/${res.data.event.slug}`)
-                        }).catch(err =>{
-                            setLoading(false)
-                        })
-                    }}>
+                    <button className={"btn"} onClick={handleCreateEvent}>
                         Create Event Link
                     </button>
                     <div className={'h-10'}>

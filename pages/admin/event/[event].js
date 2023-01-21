@@ -13,6 +13,8 @@ import {
 } from "../../../lib/eventReducer";
 import Loading from "../../../components/Loading";
 import {useRouter} from "next/router";
+import SchoolDropDown from "../../../components/SchoolDropDown";
+import PlayerCard from "../../../components/PlayerCard";
 
 const EditEvent = ({event, sponsors, schools}) => {
     const [state, dispatch] = useReducer(eventReducer, {schools, sponsors, event}, initEvent)
@@ -56,15 +58,7 @@ const EditEvent = ({event, sponsors, schools}) => {
                          </span>
                                 {
                                     !state.addSchool ? (
-                                        <select className={'input h-10 bg-white'} value={state.event.schoolId}
-                                                onChange={(e) => dispatch(setSchoolId(parseInt(e.target.value)))}>
-                                            <option defaultValue hidden>Select School</option>
-                                            {
-                                                state.schools.map((mapSchool, index) => (
-                                                    <option key={index} value={mapSchool.schId}>{mapSchool.name}</option>
-                                                ))
-                                            }
-                                        </select>
+                                        <SchoolDropDown dispatch={dispatch} schools={state.schools}/>
                                     ) : <input type={'text'} className={'input'} value={state.newSchool}
                                                onChange={(e) => dispatch(setNewSchool(e.target.value))}/>
                                 }
@@ -142,47 +136,29 @@ const EditEvent = ({event, sponsors, schools}) => {
                                 Players
                             </h2>
                             {
-                                state.players.map((player, index) => (
-                                    <div className={'flex mb-4 bg-zinc-200 p-2 rounded-md'} key={index}>
-                                        <img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`}
-                                             className={"h-20 w-20 mr-3 object-cover rounded-md drop-shadow"}
-                                             alt={`Image of ${player.name}`}/>
-                                        <div className={'flex flex-col'}>
-                                        <span className={'capitalize text-xl mb-3 text-zinc-900'}>
-                                     {
-                                         player.name
-                                     }
-                                 </span>
-                                            <span>
-                                            {
-                                                player.department
-                                            }
-                                        </span>
-                                        </div>
-                                    </div>
-                                ))
+                                state.players.map((player, index) => <PlayerCard player={player} key={index}/>)
                             }
                             {
                                 state.addPlayer && (
                                     <>
                                         <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Name
-                                 </span>
+                                            <span className={'input-label'}>
+                                                Name
+                                            </span>
                                             <input type={'text'} className={'input'} value={state.newPlayer.name}
                                                    onChange={(e) => dispatch(setPlayerName(e.target.value))}/>
                                         </div>
                                         <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Department
-                                 </span>
+                                            <span className={'input-label'}>
+                                                Department
+                                            </span>
                                             <input type={'text'} className={'input'} value={state.newPlayer.department}
                                                    onChange={(e) => dispatch(setPlayerDepartment(e.target.value))}/>
                                         </div>
                                         <div className={'flex justify-between mb-3 flex-wrap'}>
-                                     <span className={'input-label'}>
-                                     Picture
-                                 </span>
+                                            <span className={'input-label'}>
+                                                Picture
+                                            </span>
                                             <input type={'file'} className={'file-input'}
                                                    onChange={(e) => dispatch(setPlayerImage({
                                                        imageName: e.target.value,

@@ -1,8 +1,10 @@
 import axios from "../lib/axios";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Link from "next/link";
 import Icon from "../components/Icon";
 import Loading from "../components/Loading";
+import {OpenInNewRounded} from "@mui/icons-material";
+import {toast} from "react-toastify";
 
 const Event = ({links, players, event,}) => {
     const [sponsorLinks, setSponsorLinks] = useState(links.map(link => {
@@ -14,6 +16,12 @@ const Event = ({links, players, event,}) => {
     const [vote, setVote] = useState({iusr: "", playerId: null})
     const [loading, setLoading] = useState(false)
     const [hasVoted, setHasVoted] = useState(false)
+
+    const instaUserValidation = ()=>{
+        const re = /^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$/
+        return re.exec(username)
+    }
+
 
     return (
         <>
@@ -65,7 +73,7 @@ const Event = ({links, players, event,}) => {
                                                         <span className={'w-2/3 truncate'}>
                                                             {link.url}
                                                         </span>
-                                                        <Icon icon={'link'} className={'mr-3'}/>
+                                                        <OpenInNewRounded className={'mr-3'}/>
                                                     </div>
                                                 </Link>
                                             ))
@@ -73,35 +81,44 @@ const Event = ({links, players, event,}) => {
                                         <div className={'mt-3'}>
                                             Instagram Username:
                                         </div>
-                                        <input type={'text'} className={'input w-full my-2 h-10'} value={username}
-                                               onChange={(e) => setUsername(e.target.value)} placeholder={'example'}/>
-                                        <button className={"btn min-w-[100%] flex justify-center h-10 items-center text-lg mt-2"}
-                                                onClick={() => {
-                                                    let allLinksClicked = true
-                                                    sponsorLinks.forEach((link) => {
-                                                        if (!link.clicked) {
-                                                            allLinksClicked = false
-                                                            setError("Not all links have been visited")
+                                        <form onSubmit={(e)=> e.preventDefault()} >
+                                            <input
+                                                autoCapitalize={'none'}
+                                                type={'text'} className={'input w-full my-2 h-10'} value={username}
+                                                   onChange={(e) => setUsername(e.target.value)} placeholder={'example'}/>
+                                            <button className={"btn min-w-[100%] flex justify-center h-10 items-center text-lg mt-2"}
+                                                    onClick={() => {
+                                                        let allLinksClicked = true
+                                                        sponsorLinks.forEach((link) => {
+                                                            if (!link.clicked) {
+                                                                allLinksClicked = false
+                                                            }
+                                                        })
+                                                        if (!allLinksClicked){
+                                                            toast("Not all links has been followed, please click the links and follow the account", {type: "error"})
                                                         }
-                                                    })
-                                                    if (allLinksClicked && username.length !== 0){
-                                                        setVote({...vote, iusr: username})
-                                                        setProceed(true)
-                                                    } else if (username.length === 0){
-                                                        setError("Input your username for verification")
-                                                    }
-                                                    setLoading(true)
-                                                    axios.get(`/event/${event.slug}/${username}`)
-                                                        .then((res)=> {
-                                                            setHasVoted(res.data.hasVoted)
-                                                            setLoading(false)
-                                                        }).catch((err)=> {
-                                                            setLoading(false)
-                                                            console.log(err)
-                                                    })
-                                                }}>
-                                            Proceed
-                                        </button>
+                                                        let result = instaUserValidation()
+                                                        if (allLinksClicked && username.length !== 0 && result !== null){
+                                                            setVote({...vote, iusr: username.toLowerCase()})
+                                                            setLoading(true)
+                                                            axios.get(`/event/${event.slug}/${username}`)
+                                                                .then((res)=> {
+                                                                    setHasVoted(res.data.hasVoted)
+                                                                    setLoading(false)
+                                                                }).catch((err)=> {
+                                                                setLoading(false)
+                                                                console.log(err)
+                                                            })
+                                                            setProceed(true)
+                                                        } else if (username.length === 0){
+                                                            toast("Please Input the username used for following Mario", {type: "error"})
+                                                        } else if (!result){
+                                                            toast("Invalid Instagram username", {type: "error"})
+                                                        }
+                                                    }}>
+                                                Proceed
+                                            </button>
+                                        </form>
                                         {
                                             error && (
                                                 <div className={"text-red-800 flex justify-center items-center mt-5"}>
