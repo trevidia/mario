@@ -17,9 +17,6 @@ const Admin = ({events})=>{
     })
     const [tab, setTab] = useState("Events")
     const [state, dispatch] = useReducer(dashBoardReducer, events, dashStateInitializer)
-    useEffect(()=>{
-        console.log(events)
-    }, [])
 
     return (
         <BaseLayout>
@@ -112,12 +109,15 @@ const Admin = ({events})=>{
 export default Admin
 
 export const getServerSideProps = async ({req, res}) => {
-    const response = await axios.get('/event')
+    const response = await axios.get('/event').catch((err)=>{
+        console.log(err)
+    })
+    console.log(response)
     const events = response.data.events
 
     return {
         props: {
-            events
+            events: events
         }
     }
 }

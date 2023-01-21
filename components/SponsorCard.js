@@ -10,7 +10,7 @@ const SponsorCard = ({sponsor}) => {
                 {
                     sponsor.links.map((link, index)=>{
                         return (
-                            <div className={"flex"}>
+                            <div className={"flex"} key={index}>
                                 <span className={'flex-1 text-sky-500 underline truncate'}>
                                     <Link href={link.url} target={'_blank'} rel={'noopener noreferrer'}>
                                         {link.url}

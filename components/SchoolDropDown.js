@@ -9,7 +9,7 @@ export default function SchoolDropDown({schools, dispatch}) {
 
     useEffect(() => {
         dispatch(setSchoolId(selected.schId))
-    }, [selected])
+    }, [selected, dispatch])
 
     return (
         <div className="min-w-[15rem]">
