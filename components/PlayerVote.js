@@ -1,16 +1,12 @@
 import VoteProgressBar from "./VoteProgressBar";
-import {useEffect, useState} from "react";
+import Image from "next/image";
 const {random, round} = Math
 const PlayerVote = ({percent, vote, player}) => {
-    const colors = ['bg-fuchsia-400', 'bg-cyan-300', 'bg-yellow-300']
-    const [color, setColor] = useState('bg-cyan-300')
-    useEffect(()=>{
-        setColor(prevState => colors[round(random() * 2)])
-    },[])
-
   return (
       <div className={"mb-3 flex w-full items-center"}>
-          <img className={`h-10 w-10 mr-3 object-cover rounded-full`} src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`}/>
+          <div className={'w-10 h-10 relative rounded-full overflow-clip mr-3'}>
+              <Image src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`} width={200} height={200} quality={5} style={{objectFit: 'cover'}}  alt={player.name} />
+          </div>
           <div className={'flex flex-col w-full flex-1'}>
               <h4 className={'text-xl text-zinc-900'}>
                   {

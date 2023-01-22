@@ -54,9 +54,14 @@ const Admin = ({events})=>{
                 state.selectedEvent ? (
                     <div className={'flex mb-3 h-1/2 flex-wrap md:flex-nowrap shrink pb-5 md:items-stretch'}>
                         <div className={'md:h-full w-full min-h-[250px] h-72 bg-white md:mr-2 mr-0 md:mb-0 mb-3 rounded-md drop-shadow  px-5 py-4 flex flex-col'}>
-                            <h3 className={"capitalize bg-gunmetal/20  w-max p-2 mb-5 rounded"}>
-                                top 3 players
-                            </h3>
+                            <div className={'flex justify-between'}>
+                                <h3 className={"capitalize bg-gunmetal/20  w-max p-2 mb-5 rounded"}>
+                                    top 3 players
+                                </h3>
+                                <Link href={`/admin/event/${state.events.find((event) => event.eid === state.selectedEvent).slug}/votes`}>
+                                    View votes
+                                </Link>
+                            </div>
                             <div className={'overflow-y-auto h-full shrink'}>
                                 {
                                     state.events.find((event) => event.eid === state.selectedEvent).top3.map(({player, _count}, index, players)=> {
@@ -110,7 +115,7 @@ export default Admin
 
 export const getServerSideProps = async ({req, res}) => {
     const response = await axios.get('/event').catch((err)=>{
-        console.log(err)
+        // console.log(err)
     })
     console.log(response)
     const events = response.data.events

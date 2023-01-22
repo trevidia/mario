@@ -12,7 +12,7 @@ export default function SchoolDropDown({schools, dispatch}) {
     }, [selected, dispatch])
 
     return (
-        <div className="min-w-[15rem]">
+        <div className="w-full md:max-w-[15rem]">
             <Listbox value={selected} onChange={setSelected}>
                 <div className="relative mt-1">
                     <Listbox.Button

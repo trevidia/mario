@@ -1,7 +1,7 @@
-import BaseLayout from "../../../components/BaseLayout";
+import BaseLayout from "../../../../components/BaseLayout";
 import {useEffect, useReducer, useState} from "react";
-import Icon from "../../../components/Icon";
-import axios from "../../../lib/axios";
+import Icon from "../../../../components/Icon";
+import axios from "../../../../lib/axios";
 import {
     addNewPlayer,
     addNewSchool, addNewSponsor, addNewSponsorLink, editNewSponsorLink,
@@ -10,11 +10,12 @@ import {
     setEventTitle,
     setNewSchool, setPlayerDepartment, setPlayerImage, setPlayerName, setPlayers, setSchoolId,
     setSchools, setSponsorName, setSponsors, setStartDate
-} from "../../../lib/eventReducer";
-import Loading from "../../../components/Loading";
+} from "../../../../lib/eventReducer";
+import Loading from "../../../../components/Loading";
 import {useRouter} from "next/router";
-import SchoolDropDown from "../../../components/SchoolDropDown";
-import PlayerCard from "../../../components/PlayerCard";
+import SchoolDropDown from "../../../../components/SchoolDropDown";
+import PlayerCard from "../../../../components/PlayerCard";
+import LabelInput from "../../../../components/LabelInput";
 
 const EditEvent = ({event, sponsors, schools}) => {
     const [state, dispatch] = useReducer(eventReducer, {schools, sponsors, event}, initEvent)
@@ -39,18 +40,16 @@ const EditEvent = ({event, sponsors, schools}) => {
             <BaseLayout>
                 <div
                     className={'w-full h-full rounded-md bg-white mb-3 drop-shadow px-4 py-6 flex justify-center overflow-y-auto'}>
-                    <div className={'w-3/5'}>
+                    <div className={'w-full sm:w-4/5 lg:w-3/5'}>
                         <div className={'border-b py-3 mb-2'}>
                             <h4 className={"text-2xl mb-3"}>
                                 Event
                             </h4>
-                            <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                                <h6 className={'input-label'}>
-                                    Event title
-                                </h6>
-                                <input type={'text'} className={'input'} value={state.event.eventTitle}
-                                       onChange={(e) => dispatch(setEventTitle(e.target.value))}/>
-                            </div>
+                            <LabelInput
+                                label={"Event title"}
+                                value={state.event.eventTitle}
+                                onChange={(e) => dispatch(setEventTitle(e.target.value))}
+                            />
                             <div className={'w-full flex justify-between mb-3 flex-wrap'}>
                          <span className={'input-label'}>
                              {
@@ -79,8 +78,8 @@ const EditEvent = ({event, sponsors, schools}) => {
                                             }}>
                                                 <Icon icon={'cancel'} className={'mr-2'}/>
                                                 <span>
-                                         Cancel Add School
-                                     </span>
+                                                    Cancel Add School
+                                                </span>
                                             </button>
                                             <button className={'outlined-btn'}
                                                     onClick={() => {
@@ -98,38 +97,33 @@ const EditEvent = ({event, sponsors, schools}) => {
                                                     }>
                                                 <Icon icon={'save'} className={'mr-2'}/>
                                                 <span>
-                                         Save School
-                                     </span>
+                                                    Save School
+                                                </span>
                                             </button>
 
                                         </div>
                                     )
                             }
-
-                            <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                                <h6 className={'input-label'}>
-                                    Event Flyer
-                                </h6>
-                                <input type={'file'} className={'file-input'} value={state.event.imageName}
-                                       onChange={(e) => dispatch(setEventImage({
-                                           imageName: e.target.value,
-                                           image: e.target.files[0]
-                                       }))} accept={'image/*'}/>
-                            </div>
-                            <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                                <span className={'input-label'}>Start Date</span>
-                                <input
-                                    className={'input'}
-                                    type={'datetime-local'}
-                                    value={state.event.start}
-                                    onChange={
-                                        (e) => dispatch(setStartDate(e.target.value))}/>
-                            </div>
-                            <div className={'w-full flex justify-between mb-3 flex-wrap'}>
-                                <span className={'input-label'}>End Date</span>
-                                <input className={'input'} type={'datetime-local'} value={state.event.end}
-                                       onChange={(e) => dispatch(setEndDate(e.target.value))}/>
-                            </div>
+                            <LabelInput
+                                type={'file'}
+                                label={"Event flyer"}
+                                value={state.event.imageName}
+                                onChange={(e) => dispatch(setEventImage({
+                                    imageName: e.target.value,
+                                    image: e.target.files[0]
+                                }))}/>
+                            <LabelInput
+                                label={"Start Date"}
+                                type={'datetime-local'}
+                                value={state.event.start}
+                                onChange={(e) => dispatch(setStartDate(e.target.value))}
+                            />
+                            <LabelInput
+                                label={"End Date"}
+                                type={'datetime-local'}
+                                value={state.event.end}
+                                onChange={(e) => dispatch(setEndDate(e.target.value))}
+                            />
                         </div>
                         <div className={'border-b py-3 mb-2'}>
                             <h2 className={'text-2xl mb-3'}>
@@ -141,30 +135,25 @@ const EditEvent = ({event, sponsors, schools}) => {
                             {
                                 state.addPlayer && (
                                     <>
-                                        <div className={'flex justify-between mb-3 flex-wrap'}>
-                                            <span className={'input-label'}>
-                                                Name
-                                            </span>
-                                            <input type={'text'} className={'input'} value={state.newPlayer.name}
-                                                   onChange={(e) => dispatch(setPlayerName(e.target.value))}/>
-                                        </div>
-                                        <div className={'flex justify-between mb-3 flex-wrap'}>
-                                            <span className={'input-label'}>
-                                                Department
-                                            </span>
-                                            <input type={'text'} className={'input'} value={state.newPlayer.department}
-                                                   onChange={(e) => dispatch(setPlayerDepartment(e.target.value))}/>
-                                        </div>
-                                        <div className={'flex justify-between mb-3 flex-wrap'}>
-                                            <span className={'input-label'}>
-                                                Picture
-                                            </span>
-                                            <input type={'file'} className={'file-input'}
-                                                   onChange={(e) => dispatch(setPlayerImage({
-                                                       imageName: e.target.value,
-                                                       image: e.target.files[0]
-                                                   }))} value={state.newPlayer.imageName} accept={'image/*'}/>
-                                        </div>
+                                        <LabelInput
+                                            label={"Name"}
+                                            value={state.newPlayer.name}
+                                            onChange={(e) => dispatch(setPlayerName(e.target.value))}
+                                        />
+                                        <LabelInput
+                                            label={"Department"}
+                                            value={state.newPlayer.department}
+                                            onChange={(e) => dispatch(setPlayerDepartment(e.target.value))}
+                                        />
+                                        <LabelInput
+                                            label={"Picture"}
+                                            type={'file'}
+                                            value={state.newPlayer.imageName}
+                                            onChange={(e) => dispatch(setPlayerImage({
+                                                imageName: e.target.value,
+                                                image: e.target.files[0]
+                                            }))}
+                                        />
                                     </>
                                 )
                             }
@@ -223,7 +212,7 @@ const EditEvent = ({event, sponsors, schools}) => {
                                         <div className={'flex flex-col'}>
                                             {
                                                 sponsor.links.map((link, linkId) => <span
-                                                    className={'p-1 rounded bg-zinc-200 my-1'}
+                                                    className={'p-1 rounded bg-zinc-200 my-1 truncate'}
                                                     key={linkId}>{link.url}</span>)
                                             }
                                         </div>
@@ -233,15 +222,11 @@ const EditEvent = ({event, sponsors, schools}) => {
                             {
                                 state.addSponsor && (
                                     <>
-
-                                        <div className={'flex justify-between mb-3 flex-wrap'}>
-                                 <span className={'input-label'}>
-                                     Name
-                                 </span>
-                                            <input type={'text'} className={'input'} value={state.newSponsor.name}
-                                                   onChange={(e) => dispatch(setSponsorName(e.target.value))}/>
-                                        </div>
-
+                                        <LabelInput
+                                            label={"Name"}
+                                            value={state.newSponsor.name}
+                                            onChange={(e) => dispatch(setSponsorName(e.target.value))}
+                                        />
                                         {
                                             state.newSponsor.links.map((link, index) => (
                                                 <div className={'flex justify-between mb-3 flex-wrap relative'} key={index}>
@@ -288,8 +273,8 @@ const EditEvent = ({event, sponsors, schools}) => {
                                                 onClick={() => dispatch(setSponsors(state.sponsors))}>
                                             <Icon icon={'cancel'} className={'mr-2'}/>
                                             <span>
-                             Cancel Add Sponsor
-                         </span>
+                                                Cancel Add Sponsor
+                                            </span>
                                         </button>
                                         <button className={'outlined-btn'} onClick={() => {
                                             setLoading(true)

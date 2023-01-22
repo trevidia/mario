@@ -5,6 +5,7 @@ import Icon from "../components/Icon";
 import Loading from "../components/Loading";
 import {OpenInNewRounded} from "@mui/icons-material";
 import {toast} from "react-toastify";
+import Image from "next/image";
 
 const Event = ({links, players, event,}) => {
     const [sponsorLinks, setSponsorLinks] = useState(links.map(link => {
@@ -38,10 +39,11 @@ const Event = ({links, players, event,}) => {
                             <h2 className={'text-4xl z-10'}>
                                 {event.title}
                             </h2>
-                        <div className={'z-10 text-3xl'}>
-                            You have voted already. Wait for another event By <span className={'uppercase font-bold'}> Mario</span>
-                        </div>
-                        <img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${event.image}`} alt={'event flyer'} className={"h-[300px] w-[300px] object-cover z-10"}/>
+                            <div className={'z-10 text-3xl'}>
+                                You have voted already. Wait for another event By <span className={'uppercase font-bold'}> Mario</span>
+                            </div>
+                            <Image src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${event.image}`} alt={'event flyer'} height={300} width={300} className={'z-10'}/>
+                        {/*<img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${event.image}`} alt={'event flyer'} className={"h-[300px] w-[300px] object-cover z-10"}/>*/}
                     </div>
                     ) : (
                         <div className={'lg:w-4/5 w-full z-10 '}>
@@ -135,7 +137,10 @@ const Event = ({links, players, event,}) => {
                                             players.map(({player, id}, index)=> {
                                                 console.log(player)
                                                 return <div key={index} className={'bg-white px-3 py-2 flex flex-col gap-2 items-center rounded-md drop-shadow'}>
-                                                    <img src={`https://ballonmario.s3.eu-west-3.amazonaws.com/${player.image}`} className={'h-36 rounded w-36 object-cover'} alt={`${player.firstName}'s picture`}/>
+                                                    <div className={'w-36 h-40 relative rounded overflow-clip'}>
+                                                        <Image src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`} fill={true} quality={5} style={{objectFit: 'cover'}}  alt={player.name} />
+                                                    </div>
+                                                    {/*<img src={`https://ballonmario.s3.eu-west-3.amazonaws.com/${player.image}`} className={'h-36 rounded w-36 object-cover'} alt={`${player.firstName}'s picture`}/>*/}
                                                     <span className={'text-xl'}>{player.name}</span>
                                                     <span>{player.department}</span>
                                                     <button className={'bg-fuchsia-400 rounded-full w-full py-2 mb-2 flex items-center justify-center text-white hover:bg-fuchsia-500 transition-colors'} onClick={()=> {

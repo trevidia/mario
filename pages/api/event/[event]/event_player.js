@@ -11,7 +11,7 @@ const handler = async (req, res) => {
                 players: true
             }
         })
-        if (!currentEvent) res.status(400).json("Invalid event")
+        if (!currentEvent) return res.status(400).json("Invalid event")
         switch (req.method) {
             case "GET":
                 return res.json(currentEvent)

@@ -4,6 +4,7 @@ import {setSelectedEvent} from "../lib/dashBoardReducer";
 import Icon from "./Icon";
 import {toast} from "react-toastify";
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import Image from "next/image";
 
 const EventCard = ({event, dispatch, selected}) => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -38,7 +39,9 @@ const EventCard = ({event, dispatch, selected}) => {
                   {
                       event.top3.map(({player}, index)=> {
                           return (
-                              <img src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`} key={index} className={'h-8 w-8 ml-2 rounded object-cover'} alt={`${player.name} image`}/>
+                              <div className={'h-8 w-8 ml-2 rounded relative overflow-clip'} key={index}>
+                                  <Image src={`${process.env.NEXT_PUBLIC_AMAZON_BUCKET}/${player.image}`} alt={`${player.name} image`} fill={true} style={{objectFit: 'cover'}}/>
+                              </div>
                           )
                       })
                   }
