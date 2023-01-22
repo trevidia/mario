@@ -1,4 +1,5 @@
-import {DeleteForever, ModeEditOutlined} from "@mui/icons-material";
+import ModeEditOutlined from "@mui/icons-material/ModeEditOutlined";
+import DeleteForever from "@mui/icons-material/DeleteForever";
 import Image from "next/image";
 
 const PlayerCard = ({player}) => {

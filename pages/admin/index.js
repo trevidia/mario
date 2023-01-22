@@ -7,7 +7,7 @@ import Icon from "../../components/Icon";
 import axios from "../../lib/axios";
 import {dashBoardReducer, dashStateInitializer} from "../../lib/dashBoardReducer";
 import Link from "next/link";
-import {AddOutlined} from "@mui/icons-material";
+import AddOutlined from "@mui/icons-material/AddOutlined";
 
 
 const Admin = ({events})=>{

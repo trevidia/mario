@@ -1,6 +1,7 @@
 import {Dialog, Transition} from '@headlessui/react'
 import {Fragment} from "react";
-import {CheckOutlined, InsertLinkOutlined} from "@mui/icons-material";
+import CheckOutlined from "@mui/icons-material/CheckOutlined";
+import InsertLinkOutlined from "@mui/icons-material/InsertLinkOutlined";
 import {toast} from "react-toastify";
 import {useRouter} from "next/router";
 import {setDialogOpen} from "../lib/eventReducer";

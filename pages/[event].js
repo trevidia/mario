@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import Link from "next/link";
 import Icon from "../components/Icon";
 import Loading from "../components/Loading";
-import {OpenInNewRounded} from "@mui/icons-material";
+import OpenInNewRounded from "@mui/icons-material/OpenInNewRounded";
 import {toast} from "react-toastify";
 import Image from "next/image";
 
@@ -69,7 +69,6 @@ const Event = ({links, players, event,}) => {
                                                                 state[index].clicked = true
                                                                 return [...state]
                                                             })
-                                                            console.log(link)
                                                             await axios.get(`/link/${link.lid}`)
                                                         }}>
                                                         <span className={'w-2/3 truncate'}>

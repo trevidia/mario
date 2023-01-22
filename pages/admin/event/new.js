@@ -9,7 +9,10 @@ import {
     setSchools, setSponsorName, setSponsors, setStartDate
 } from "../../../lib/eventReducer";
 import Loading from "../../../components/Loading"
-import {AddOutlined, CancelOutlined, DeleteOutline, SaveOutlined} from "@mui/icons-material";
+import AddOutlined from "@mui/icons-material/AddOutlined";
+import CancelOutlined from "@mui/icons-material/CancelOutlined";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import SaveOutlined from "@mui/icons-material/SaveOutlined";
 import SchoolDropDown from "../../../components/SchoolDropDown";
 import LabelInput from "../../../components/LabelInput";
 import SuccessLinkModal from "../../../components/SuccessLinkModal";
