@@ -22,7 +22,7 @@ const handler = async (req, res) => {
 
         const voteDetails = await prisma.vote.findMany({
             where: condition, orderBy: {
-                vid: 'asc'
+                vid: 'desc'
             },
         })
         const count = voteDetails.length
@@ -43,7 +43,7 @@ const handler = async (req, res) => {
                 },
                 where: condition,
                 orderBy: {
-                    vid: 'asc'
+                    vid: 'desc'
                 },
                 include: {
                     player: {
