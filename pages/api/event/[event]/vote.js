@@ -76,7 +76,7 @@ const handler = async (req, res) => {
                     lastPage: pages,
                     firstPageUrl: `${url}?page=1`,
                     lastPageUrl: `${url}?page=${pages}`,
-                    prevPageUrl: page > 1 ? `${url}?page=${page + 1}` : null,
+                    prevPageUrl: page > 1 ? `${url}?page=${page - 1}` : null,
                     nextPageUrl: page < pages ? `${url}?page=${page + 1}` : null,
                     from: page === 1 ? 1 : page === pages && index + 1 % length !== 0 ? Math.trunc(((index + 1) / length)) * length + 1 :  index + 2 - length,
                     to: index + 1,
