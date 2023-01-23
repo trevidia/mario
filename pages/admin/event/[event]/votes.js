@@ -24,7 +24,7 @@ const Votes = ({votes: propVotes, eventPlayers: propPlayers}) => {
 
     function handleNextVotes() {
         axios.get(votes.nextPageUrl).then((res)=>{
-            setVotes(res.data.eventPlayers)
+            setVotes(res.data.votes)
             setPlayers(res.data.eventPlayers)
         }).catch((err)=> {
             console.log(err)
