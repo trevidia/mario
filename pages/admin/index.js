@@ -8,6 +8,7 @@ import axios from "../../lib/axios";
 import {dashBoardReducer, dashStateInitializer} from "../../lib/dashBoardReducer";
 import Link from "next/link";
 import AddOutlined from "@mui/icons-material/AddOutlined";
+import {eventPlayers} from "../../lib/utils";
 
 
 const Admin = ({events})=>{
@@ -64,17 +65,7 @@ const Admin = ({events})=>{
                             </div>
                             <div className={'overflow-y-auto h-full shrink'}>
                                 {
-                                    state.events.find((event) => event.eid === state.selectedEvent).top3.map(({player, _count}, index, players)=> {
-                                        const totalVotes = players.reduce((previousValue, currentValue, currentIndex) => {
-                                            if (currentIndex >= 2){
-                                                return previousValue + currentValue._count.votes
-                                            } else {
-                                                return previousValue._count.votes + currentValue._count.votes
-                                            }
-                                        })
-                                        console.log(totalVotes)
-                                        return <PlayerVote player={player} key={index} vote={_count.votes} percent={Math.round((_count.votes/ totalVotes) * 100)}/>
-                                    })
+                                    eventPlayers(state.events.find((event) => event.eid === state.selectedEvent).top3)
                                 }
                             </div>
                         </div>

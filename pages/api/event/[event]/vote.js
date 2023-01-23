@@ -68,8 +68,28 @@ const handler = async (req, res) => {
 
         switch (req.method) {
             case "GET":
+                const eventPlayers = await prisma.eventPlayer.findMany({
+                    where: {
+                        event: {
+                            slug: event
+                        },
+                    },
+                    orderBy:{
+                        votes: {
+                            _count: 'desc'
+                        }
+                    },
+                    select: {
+                        player: true,
+                        _count: {
+                            select: {
+                                votes: true
+                            }
+                        }
+                    }
+                })
                 const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/event/${event}/vote`
-                return res.json({
+                return res.json({votes: {
                     total: count,
                     perPage: length,
                     currentPage: page,
@@ -81,7 +101,7 @@ const handler = async (req, res) => {
                     from: page === 1 ? 1 : page === pages && index + 1 % length !== 0 ? Math.trunc(((index + 1) / length)) * length + 1 :  index + 2 - length,
                     to: index + 1,
                     data: votes,
-                })
+                }, eventPlayers})
             case "POST":
                 const {vote} = req.body
                 if (!(vote)) return res.status(400).json({message: "Invalid Input"})

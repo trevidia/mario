@@ -2,13 +2,21 @@ import BaseLayout from "../../../../components/BaseLayout";
 import axios from "../../../../lib/axios";
 import Link from "next/link";
 import {useEffect, useState} from "react";
+import PlayerVote from "../../../../components/PlayerVote";
+import {eventPlayers} from "../../../../lib/utils";
 
-const Votes = ({votes: propVotes}) => {
+const Votes = ({votes: propVotes, eventPlayers: propPlayers}) => {
     const [votes, setVotes] = useState(propVotes)
+    const [players, setPlayers] = useState(propPlayers)
+
+    useEffect(()=>{
+        console.log(players)
+    }, [players])
 
     function handlePrevVotes() {
         axios.get(votes.prevPageUrl).then((res)=>{
-            setVotes(res.data)
+            setVotes(res.data.votes)
+            setPlayers(res.data.eventPlayers)
         }).catch((err)=> {
             console.log(err)
         })
@@ -16,7 +24,8 @@ const Votes = ({votes: propVotes}) => {
 
     function handleNextVotes() {
         axios.get(votes.nextPageUrl).then((res)=>{
-            setVotes(res.data)
+            setVotes(res.data.eventPlayers)
+            setPlayers(res.data.eventPlayers)
         }).catch((err)=> {
             console.log(err)
         })
@@ -25,6 +34,12 @@ const Votes = ({votes: propVotes}) => {
     return (
         <BaseLayout>
             <div className={'overflow-y-auto w-full'}>
+                <h2 className={"text-3xl mb-4"}>Votes</h2>
+                <div className={'bg-white rounded-md shadow mb-3 px-4 py-2'}>
+                    {
+                        eventPlayers(players)
+                    }
+                </div>
                 <div className="relative overflow-x-auto">
                     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -121,10 +136,12 @@ export default Votes
 
 export const getServerSideProps = async ({params}) => {
     let {event, page} = params
-    const response = await axios.get(`/event/${event}/vote?${page ?? ""}`)
+    const response = await axios.get(`/event/${event}/vote?${page ?? ""}`).catch(err => {})
+    // const totalVotesRes =
     return {
         props: {
-            votes: response.data
+            votes: response.data.votes,
+            eventPlayers: response.data.eventPlayers
         }
     }
 }
